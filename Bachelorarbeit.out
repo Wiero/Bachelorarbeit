@@ -1,0 +1,17 @@
+\BOOKMARK [0][-]{chapter.1}{Einleitung}{}% 1
+\BOOKMARK [1][-]{subsection.1.0.1}{Ethernet}{chapter.1}% 2
+\BOOKMARK [2][-]{subsection.1.0.2}{IP}{subsection.1.0.1}% 3
+\BOOKMARK [2][-]{subsection.1.0.3}{TCP}{subsection.1.0.1}% 4
+\BOOKMARK [2][-]{subsection.1.0.4}{DHCP}{subsection.1.0.1}% 5
+\BOOKMARK [2][-]{subsection.1.0.5}{AMIDAR}{subsection.1.0.1}% 6
+\BOOKMARK [0][-]{chapter.2}{Implementierung}{}% 7
+\BOOKMARK [1][-]{subsection.2.0.1}{\334berblick}{chapter.2}% 8
+\BOOKMARK [2][-]{subsection.2.0.2}{TCP Stack}{subsection.2.0.1}% 9
+\BOOKMARK [2][-]{subsection.2.0.3}{IP Stack}{subsection.2.0.1}% 10
+\BOOKMARK [2][-]{subsection.2.0.4}{DHCP}{subsection.2.0.1}% 11
+\BOOKMARK [2][-]{subsection.2.0.5}{Stream Sockets}{subsection.2.0.1}% 12
+\BOOKMARK [0][-]{chapter.3}{Evaluation}{}% 13
+\BOOKMARK [1][-]{subsection.3.0.1}{Testaufbau}{chapter.3}% 14
+\BOOKMARK [2][-]{subsection.3.0.2}{Funktionen}{subsection.3.0.1}% 15
+\BOOKMARK [2][-]{subsection.3.0.3}{Performanz}{subsection.3.0.1}% 16
+\BOOKMARK [0][-]{chapter.4}{Zusammenfassung}{}% 17

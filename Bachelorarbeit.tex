@@ -1,0 +1,85 @@
+\documentclass[accentcolor=tud1c,colorback,ngerman,12pt] {tudreport}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage{acronym}
+\usepackage{listings}
+\usepackage{tabularx}
+\usepackage{url}
+\usepackage{hyperref}
+
+\lstset{language=C,basicstyle=\small, breaklines=true, showtabs=false, showspaces=false, showstringspaces=false}
+
+\renewcommand{\lstlistingname}{Quelltext}
+\lstset{literate=%
+{Ö}{{\"O}}1
+{Ä}{{\"A}}1
+{Ü}{{\"U}}1
+{ß}{{\ss}}1
+{ü}{{\"u}}1
+{ä}{{\"a}}1
+{ö}{{\"o}}1
+}
+
+\setinstitutionlogo[height]{bilder/rechnersysteme-transparent}
+
+\begin{document}
+\title{Implementierung eines multithreaded TCP/IP Stacks für einen auf AMIDAR basierten Java Prozessor}
+\subtitle{Bachelorarbeit}
+\subsubtitle{Robert Wiesner \hfill  \\31. Mai 2017}
+
+\maketitle
+\chapter*{Erklärung gemäß § 22 Abs. 7 APB}
+
+Hiermit erkläre ich gemäß § 22 Abs. 7 der Allgemeinen Prüfungsbestimmungen (APB) der Technischen Universität Darmstadt in der Fassung der 4. Novelle vom 18. Juli 2012, dass ich die Arbeit selbstständig verfasst und alle genutzten Quellen angegeben habe und bestätige die Übereinstimmung von schriftlicher und elektronischer Fassung.\\ \\ \\ \\
+
+\parbox{8cm}{\centering Darmstadt, den 31. Mai 2017\hrule
+\strut \centering\footnotesize Ort, Datum} \hfill\parbox{8cm}{\phantom{Darmstadt, den 31. Mai 2017} \hrule
+\strut \centering\footnotesize Robert Wiesner}
+
+\vfill
+
+\noindent \textbf{Fachbereich Elektro- und Informationstechnik}\\
+Institut für Datentechnik\\
+Fachgebiet Rechnersysteme\\
+Prüfer: Prof. Dr.-Ing. Christian Hochberger\\
+Betreuer: Dipl.-Inform. Changgong Li
+
+\tableofcontents
+
+\include{Einleitung}
+\include{Implementierung}
+\include{Evaluation}
+\include{Zusammenfassung}
+
+\section*{Abkürzungsverzeichnis}
+\begin{acronym}
+ \acro{CLB}{Configurable Logic Block}
+ \acro{CPU}{central processing unit}
+ \acro{ELF}{Executable and Linking Format}
+ \acro{FPGA}{Field Programmable Gate Array}
+ \acro{MC}{Microcontroller}
+ \acro{CPU}{central processing unit}
+ \acro{NCD}{Native Circuit Description Format}
+ \acro{SoC}{System on Chip}
+ \acro{Sph}{SpartanMC Hex Dateiformat}
+ \acro{XDL}{Xilinx Design Language Format}
+
+
+
+
+\end{acronym}
+
+\listoffigures
+
+\makeatletter
+\renewcommand\chapter{\thispagestyle{\chapterpagestyle}%
+                    \global\@topnum\z@
+                    \@afterindentfalse
+                    \secdef\@chapter\@schapter}
+\makeatother
+
+\nocite{*}
+\bibliographystyle{alphadin}
+\bibliography{Literaturverzeichnis}
+
+\end{document}
