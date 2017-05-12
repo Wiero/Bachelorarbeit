@@ -33,19 +33,19 @@ Das IP Protokoll ist das für die Datenübertragung wichtigste Protokoll, auf de
 
 \subsection{Paket Aufbau}
 
-Version: Gibt in an welche Version des IP Protokolls verwendet wird. (4Bit) \\
-IHL: Steht für Internet Header Length und gibt an wie 32Bit Wörter von dem IP-Header belegt werden.\\
-ToS: Type of Service \\
-Paketlänge: \\
-Kennung: \\
-Flags: \\
-Fragment-Offset: \\
-TTL (Time-to-live) \\
-Protokoll: \\
-Header Checksumme: \\
-Quell-IP-Adresse: \\
-Ziel-IP-Adresse:\\
-Optionen/Füllbits\\
+Version: Gibt in an welche Version des IP Protokolls verwendet wird. (4Bit) \\\\
+IHL: Steht für Internet Header Length und gibt an wie 32Bit Wörter von dem IP-Header belegt werden.\\\\
+ToS: Type of Service beinhaltet abstrakte Parameter zur Bestimmung der Qualität des gewünschten Services. Dabei geben die Bits Null bis Zwei die Priorität der Daten an. Die Bits Drei, Vier und Fünf stehen für niedrige Latenz, hohen Durchsatz und hohe Zuverlässigkeit. Die letztgenannten Parameter werden von Netwerkgeräten von unterschiedlich interpretiert, in dem meisten ruft bessere Performance für einen der Parameter eine Verschlechterung bei einen anderen herbei.\\
+Paketlänge: Gesamtlänge eines Pakets in Bytes einschließlich des Headers. Die 16Bit ergeben eine theoretische Gesamtlänge von 65.535 Bytes, was für viele Netzwerke jedoch nicht geeignet ist. Als Mindestgröße die alle Hosts unterstützen müssen wurde 576 Bytes festgelegt. Das ermöglicht es 512 Byte Daten und 64 Byte Header in einen Paket zu übertragen. Da der IP Header selber nur 20 Byte benötigt bleibt noch ein Puffer von \\\\
+Kennung: Ein Identifikationswert, der benötigt wird um fragmentierte Pakete wieder zusammen zu setzen.  (16Bit)  \\\\
+Flags: 3 Bits von denen das erste reserviert ist und dauerhaft auf Null gesetzt wird. Das zweite Bit gibt an, ob das Paket fragmentiert werden darf. Das letzte Bit wird gesetzt, wenn nach dem Paket noch weiter Fragmente folgen. \\\\
+Fragment-Offset: Besteht aus 13 Bit und gibt an, an welche Stelle des Datagramms die Daten dieses Fragments gehören. \\\\
+TTL (Time-to-live): Gibt die maximale Zeit in Sekunden an, die ein Paket im Netzwerk unterwegs sein darf. Sobald die TTL den Wert Null erreicht muss das Paket gelöscht werden. Da der Wert bei jeder Zwischenstation, unabhängig von der eigentlichen Verarbeitungszeit ebenfalls um eins Reduziert werden muss ist die übliche Lebensdauer eines Pakets deutlich kürzer als in der TTL angegeben. \\\\
+Protokoll: Gibt an welches Protokoll im nächst höheren Level verwendet wird. \\\\
+Header Checksumme: Checksumme nur über den Header. Da sich der Header beim Weg Zwischenstationen verändern kann, zum Beispiel wegen der Time to Life , muss die Checksumme nach jeder Verarbeitung des Headers an den Zwischenstationen neu berechnet werden.\\\\
+Quell-IP-Adresse: IP Adresse des Hosts, der das Paket ursprünglich versendet hat.\\\\
+Ziel-IP-Adresse:IP Adresse des Zielendgeräts\\\\
+Optionen/Füllbits\\\\
 \subsection{Adressierung}
 
 \subsection{Fragmentierung}
