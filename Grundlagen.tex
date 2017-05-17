@@ -119,6 +119,23 @@ Nach dem Erhalt des SYN-ACK Pakets sendet die initiierende Seite ein leeres ACK 
 \subsection{Verbindungsabbau}
 
 \section{Dynamic Host Control Protocol (DHCP)}
-Mit größeren lokalen Netzwerken mit wechselnden Teilnehmer kam der bedarf nach einer Zentralen Einrichtung, die die Verteilung der IP-Adressen innerhalb eines Netzwerkes verwaltet. Dafür wurde aufbauend auf den älteren Bootstrap Protokoll DHCP entwickelt.
+Mit größeren lokalen Netzwerken mit wechselnden Teilnehmer kam der bedarf nach einer Zentralen Einrichtung, die die Verteilung der IP-Adressen innerhalb eines Netzwerkes verwaltet. Dafür wurde aufbauend auf den älteren Bootstrap Protokoll DHCP entwickelt. Um dies zu realisieren wird das Optionsfeld des Bootstap Protocols genutzt. Um ein Bootstrap Paket als DHCP Paket zu identifizieren werden die ersten 32 Bit des Optiopnsfeldes durch den "Magic Cookie" 99.130.83.99 belegt. 
+
+
+\subsection{Paket Format DHCP (Bootstrap)}
+%Bild einfügen
+Op: Gibt den generellen Typ der Nachricht an. Ein Wert von 1 signalisiert eine Anfrage, wobei eine 2 eine Antwort signalisiert. \\
+HType: Spezifiziert die Art der dem Netzwerk zugrunde liegende Hardware. Der Code 1 steht dabei für Ethernet. \\
+HLen: Bezeichnet die Länge der physischen Adressen im Netzwerk. Im Falle von Ethernet Netzwerken sind dies 6 Byte. \\
+Hops: Wird beim Absenden auf 0 gesetzt und von jedem Relay Agent" um eins erhöht. \\
+XID: Eine Identifikationsnummer mit der Server Antworten den Anfragen zugeordnet werden können. \\
+Secs: Dieses Feld ist für das Bootstrap Protokoll ungenau definiert und wird oft nicht verwendet. Für DHCP wird es für die Zeit in Sekunden genutzt die vergangen ist, seit der Client damit begonnen hat nach einen neuen "Lease" zu fragen. \\
+Flags: 8 Bits de für als Flags genutzt werden können. Das erste Bit wird gesetzt, falls die Nachricht als Broadcast gesendet wird, was den DHCP Server signalisiert, das dieser über keine gültige IP Adresse verfügt. \\
+CIAddr: Steht für "Client IP Adresse" Der Client schreibt seine eigene IP-Adresse in dieses Feld. Im falle von DHCP kann dieses nur in den Zuständen BOUND, RENEWING oder REBINDING genutzt werden. In allen anderen Fällen bleibt dieses Feld auf Null. \\
+ 
+
+
+
+
 
 \section{AMIDAR}
