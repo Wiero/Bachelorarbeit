@@ -139,7 +139,64 @@ CHAddr: Hardware Adresse des Clients. Bei Nutzung von Ethernet die Mac-Adresse. 
 SName: Der DHCP Server kann hier optional seinen Namen angeben. Alternativ kann dieses Feld durch die "option overload" Funktion auch für Optionen genutzt werden.\\\\
 File: Kann genutzt werden um bei einen DHCPDISCOVER oder OFFER eine Bootdatei anzugeben. \\\\
 Options: Für das Bootstrap Protokoll gibt es eine große Menge an Optionen, einige davon werden exklusiv für DHCP genutzt. \\\\
-Die Anzahl und Art der verwendeten Optionen ist variabel. Der Aufbau von diesen folgt jedoch einen definierten Format. 
+Die Anzahl und Art der verwendeten Optionen ist variabel. Der Aufbau von diesen folgt jedoch einen definierten Format. Die ersten 8 Bit eines Optionsblock enthalten den Code der Option, weitere 8 Bit geben die Länge des folgenden Datenfeldes an. Das Optionfeld beginnt im Falle von DHCP mit der "Magic Number" 99.130.83.99 nur dann können die exklusiven DHCP Optionen genutzt werden.
+Dazu gehören:
+\begin{description}
+	\item[Requested IP Address] Diese Option kann während eines dhcp Discovers gesetzt werden um die Verfügbarkeit einer bestimmten IP-Adresse anzufragen.\\
+	Code: 50; Länge: 4 Byte;
+	 
+	\item[IPAddress Lease Time] Kann in einer DHCP-Request oder DHCP-Offer Nachricht gesetzt werden. Der Client kann dabei eine bestimmte Lease Time in Sekunden angeben.\\
+	Code:51; Länge 4 Byte;
+	
+	\item[Option Overload] Diese option signalisiert, das Option Overload genutzt wird. Das bedeutet das weitere Optionen anstelle der Felder SNAME oder FILE geschrieben werden. \\
+	Code 52; Länge 1;
+	Es gibt 3 mögliche Werte die geschrieben werden können. 
+	\begin{itemize}
+		\item 1: Optionen stehen im File Feld. 
+		\item 2: Optionen stehen im SNAME Feld.
+		\item 3: Optionen stehen in beiden Feldern.
+	\end{itemize}
+	
+	\item[DHCP Message Type] dieses Feld ist bei DHCP Nachrichten immer vorhanden und gibt die Art der DHCP Nachricht an. \\
+	Code 53; Länge 1;
+	\begin{itemize}
+		\item 1 DHCPDISCOVER
+		\item 2 DHCPOFFER
+		\item 3 DHCPREQUEST
+		\item 4 DHCPDECLINE
+		\item 5 DHCPACK
+		\item 6 DHCPNAK
+		\item 7 DHCPRELEASE
+		\item 8 DHCPINFORM		
+		
+	\end{itemize}
+	
+	\item[Server Identifier] Die Option kann von einem Client bei einer DHCPREQUEST gesetzt werden, um bei Unicast Nachrichten die Adresse von einen bestimmter Server anzugeben. Ein DHCP-Server kann dieses Feld setzten, damit ein Client mehrere DHCP Offer unterscheiden kann. \\
+	Code 54; Länge 4;
+	
+	
+	\item[Parameter Request List] Es kann eine Liste von Parametern übergeben werden um die Werte von diesen bei einen Server anzufragen. Dazu kann eine beliebig Lange Folge aus DHCP/Bootstrap Optionscodes genutzt werden\\
+	Code 54; Länge n;
+	
+	
+\end{description}
+
+\subsection{Ablauf}
+
+Zu Beginn eines DHCP-Vorgangs, wenn zum Beispiel ein Client hochgefahren wird, verfügt dieser weder über eine IP-Adresse, noch über andere Information die Netzerktopologie betreffend. Als erstes sendet der Client ein Discover Paket. Dafür wird der Operationscode auf 1 gesetzt um eine request Paket zu signalisieren, die MAC-Adresse wird für die Physische Client Adresse verwendet, das Broadcast-Flag wird gesetzt und der DHCP-Message-Type wird auf Discover gesetzt. Aus diesen DHCP-Paket wird ein UDP-Paket erzeugt, mit den Quellport  68 und dem Zielport 67. Die Nachricht wird als Broadcast gesendet. \\
+Auf diese Anfrage können einer oder mehrere DHCP Server antworten. Wenn kein bestimmter in der DISCOVER-Nachricht spezifiziert wurde, schicken alle Server in den jeweiligen Netzwerk ein "OFFER". Diese Nachricht wird ebenfalls als Broadcast gesendet, da der Client noch keine eigene IP zugewiesen hat. Das OFFER enhält einen Vorschlag mit einer IP Adresse in dem Feld "Your IP Address". Anhand der "Transaction ID" und dem Feld CHADDR kann der Client die Offer eindeutig seiner Anfrage zuordnen. \\
+Der Client antwortet auf das "OFFER" mit einer "REQUEST" Nachricht. Dafür wird die Option "Requested IP Address" gesetzt. \\
+Auf das Request antwortet der Server wiederum mit einen ACK zu Bestätigung. Wenn der Client die Bestätigung erhält, prüft dieser ob die IP-Adresse schon genutzt wird, in dem er eine ARP Request für diese startet. Wird diese Beantwortet ist die Adresse schon in Benutzung. Ist dies nicht der Fall übernimmt der Client die Adresse. 
+Die ACK Nachricht enthält die Lease-Zeit, welche angibt, wie lange eine IP gültig ist. 
+Nachdem die hälfte der Lease-Zeit abgelaufen ist, sendet der Client eine weitere REQUEST-Nachricht. Da er zu diesem Zeitpunkt noch über eine gültige IP-Adresse verfügt sendet er die Nachricht nicht als Broadcast, sondern als Unicast direkt an den DHCP-Server von dem er die IP zugewiesen bekommen hat. In dem Fall, das er auf die Request keine Antwort bekommen hat, startet er nach Ablauf der Lease Zeit wieder mit einen DISCOVER.
+
+
+
+Während dieses Vorgangs können neben der IP auch noch andere Informationen abgefragt werden. Wie beispielsweise die Adressen von DNS- und Zeitservern.
+
+%Bild eines DHCP Ablaufs. 
+
+
 
 
 \section{AMIDAR}
