@@ -112,14 +112,40 @@ Ein wichtiges Grundprinzip von TCP das jedes Byte an Daten eine eigene Sequenznu
 \subsection{Verbindungsaufbau}
 Um zuverlässig einen sicheren Verbindungsaufbau zu gewährleisten verwendet TCP einen Drei Wege Handshake. Soll eine neue Verbindung aufgebaut werden wird die Initiale Sequenznummer zuverlässig generiert. Das SYN Paket enthält nur den HEADER mit der um eins inkrementierten Initialen Sequenznummer und den SYN bit auf eins gesetzt. Nach dem Sendevorgang wird in den Zustand SYN-SENT gewechselt. Wenn die Empfängerseite sich im Zustand LISTEN befindet kann die Verbindunganfrage bestätigt werden. Dafür wird ebenfalls eine Initiale Sequenznummer generiert. Zur Antwort wird ein Paket erzeugt, das die neue initiale Sequenznummer verwendet und als Acknummer die um eins erhöhte Sequenznummer des SYN Pakets verwendet. Die Flags für SYN und ACK werden gesetzt. Nach dem senden wird in den Zustand SYN-RECEIVED gewechselt.\\
 Nach dem Erhalt des SYN-ACK Pakets sendet die initiierende Seite ein leeres ACK Paket und wechselt in den ESTABLISHED Zustand. 
+%Sequenzdiagramm
+
 \subsection{Datenübertragung}
 
+Wenn beide Seiten einer Verbindung den Established-Zustand erreicht haben, kann die eigentliche beidseitige Datenübertragung beginnen. Dabei wird die Übertragung der Daten als kontinuierlicher Datenstrom abstrahiert. Eine Anwendung schreibt dabei Bytes auf die in einen Datenpuffer im TCP-Stack. Die Datenwerden nicht sofort Übertragen, da sonst viele Pakete mit wenig Nutzdaten gesendet werden würden und die Verbindung schnell überlastet wäre, wobei ein großer Teil der übertragenen Daten für den durch TCP-, IP- und Ethernet-Header erzeugten Overhead genutzt werden müssten. Sobald der Schreibpuffer eine bestimmte Größe erreicht hat, oder die Software einen PUSH signalisiert, wird ein TCP-Paket erzeugt, das die Daten aus dem Puffer überträgt. Jedes Datenpaket wird mit einen Zeitstempel in der Retransmitqueue zwischengespeichert bis der Erhalt dieser bestätigt wurde. Nach dem Eintreffen eines Pakets, dessen ACK Flag gesetzt wurde, gelten alle Pakete, der Sequenznummer unter der Acknowledge-Nummer des angekommenen Paktes liegen bestätigt. Diese werden aus der Retransmitqueue entfernt. Wenn für ein Paket eine bestimmte Zeit lang keine Bestätigung eingetroffen ist, wird dieses nochmal gesendet. 
+
 \subsection{Überlastkontrolle}
+
+Ein weiterer Schwerpunkt bei TCP ist das verhindern der Überlastung des Netzwerks, das zwischen Sender und Empfänger liegt, als auch die des Empfängers selber. 
+Die beiden Mechanismen werden "Flow Control" und "Congestion Control" genannt. 
+Flow Control verhindert dabei die Überlastung des Empfängers und Congestion Control die des Übertragungsweges. 
+Für das senden von Daten wird für Flow und Congestion Control jeweils ein Fenster bestimmt. Das Fenster gibt an, wie viele Bytes gesendet werden könne, ohne das diese bestätigt wurden. Wenn die Differenz der Sequenznummern und der letzten erhalten Acknowledgenummer so groß ist wie das Fenster, werden keine neuen Datenpakete mehr versenden, bis weiter Pakete bestätigt wurden. Es wird jeweils das kleinere Fenster als Grenze genommen. \\
+Das Flow Control vom Empfänger im TCP Header der von ihm versendeten Pakete angeboten. 
+Das Problem bei der Congestion Control ist, das die Kapazität der Verbindung nicht trivial zu bestimmen ist. Für eine Annäherung kommen im normal Fall vier Algorithmen zum Einsatz. Mit Hilfe der Variable "Slow Start Threshold" wird festgelegt, welcher der Algorithmen im aktuellen Zeitpunkt zum Einsatz kommt. So lange unter der Slow Start Threshold liegt, wird der Slow Start Algorithmus verwendet. Eine Überlastung der Verbindung kann festgestellt werden, wenn mehrere Acknowledge Pakete für die selbe Sequenznummer empfangen werden.\\
+ Zu beginn einer Übertragung liegen noch keine Informationen über die mögliche Bandbreite des Netzwerks vor, weswegen die Bandbreite langsam sondiert werden muss. Dabei wird Slow Start Algorithmus genutzt, mit durch schnelles ansteigen der Übertragungsrate der Grenzwert erreicht wird. Die Slow Start Phase wird genutzt, bis die Größe des Congestion Windows die Slow Start Threshold übersteigt, oder eine Überlastung der Verbindung festgestellt wird. Da die Grenze der Verbindungskapazität sondiert werden soll wird die Slow Start Threshold zu Beginn auf einen Wert gesetzt, der nicht erreicht werden kann. Nachdem eine Überlastung festgestellt wurde, wird die Slow Start Threshold auf einen Wert, der einen Bruchteil des erreichten Fensters entspricht gesetzt und der Slow Start Algorithmus, mit einen größeren Initialen Fenster, weiter verwendet. Diesmal wird die Slow Start Phase durch das Überschreiten der Slow Start Threshhold beendet. Für den Rest der Übertragung wechseln sich die beiden Algorithmen ab, bis die Verbindung beendet ist.
+
+Es gibt eine ganze Reihe von Varianten für die Congestion Control Algorithmen. Hier wird als Beispiel die Reno Variante genannt.
+
+\begin{description}
+\item[Slow Start: ] Vergrößert das Congestion Window mit jeden bestätigten Segment um die Größe des Segments. Effektiv eine Verdoppelung des Windows pro Roundtrip.
+N := Anzahl der im letzten Ack bestätigten Sequenznummern
+\item[Congestion Avoidance :] Arbeitetet nach dem Prinzip Additiv Erhöhen, multiplikativ erniedrigen. 
+\item[Fast Retransmit :] Findet statt, wenn mehrere ACKNOWLEDGE-Pakete für das selbe Segment empfangen werden. Dabei kann sicher davon ausgegangen werden, das dieses Segment verloren gegangen ist. In diesen Fall wird nicht auf einen Timteout für dieses Paket gewartet, stattdessen wird dieses sofort gesendet. Anschließend wird auf das nächste Acknowledge gewaret, für den Fall, das der Empfänger die nachfolgenden Pakete in seinen Puffer hat und dieses zusammensetzen kann.   
+\item[Fast Recovery :]
+
+
+\end{description}
 
 \subsection{Verbindungsabbau}
 
 \section{Dynamic Host Control Protocol (DHCP)}
-Mit größeren lokalen Netzwerken mit wechselnden Teilnehmer kam der bedarf nach einer Zentralen Einrichtung, die die Verteilung der IP-Adressen innerhalb eines Netzwerkes verwaltet. Dafür wurde aufbauend auf den älteren Bootstrap Protokoll DHCP entwickelt. Um dies zu realisieren wird das Optionsfeld des Bootstap Protocols genutzt. Um ein Bootstrap Paket als DHCP Paket zu identifizieren werden die ersten 32 Bit des Optiopnsfeldes durch den "Magic Cookie" 99.130.83.99 belegt. 
+Mit größeren lokalen Netzwerken mit wechselnden Teilnehmer kam der bedarf nach einer Zentralen Einrichtung, die die Verteilung der IP-Adressen innerhalb eines Netzwerkes verwaltet. Dafür wurde aufbauend auf den älteren Bootstrap Protokoll DHCP entwickelt. DHCP ist deswegen weitgehend kompatibel mit Bootstrap, weswegen mit Bootstrap Clients und Servern zusammengearbeitet werden kann. 
+Neben der IP-Adresse können auch andere Parameter abgefragt werden. Zum Beispiel Gateway, Netzmaske, Zeitserver und Nameserver. 
+
 
 
 \subsection{Paket Format DHCP (Bootstrap)}
@@ -188,8 +214,7 @@ Auf diese Anfrage können einer oder mehrere DHCP Server antworten. Wenn kein be
 Der Client antwortet auf das "OFFER" mit einer "REQUEST" Nachricht. Dafür wird die Option "Requested IP Address" gesetzt. \\
 Auf das Request antwortet der Server wiederum mit einen ACK zu Bestätigung. Wenn der Client die Bestätigung erhält, prüft dieser ob die IP-Adresse schon genutzt wird, in dem er eine ARP Request für diese startet. Wird diese Beantwortet ist die Adresse schon in Benutzung. Ist dies nicht der Fall übernimmt der Client die Adresse. 
 Die ACK Nachricht enthält die Lease-Zeit, welche angibt, wie lange eine IP gültig ist. 
-Nachdem die hälfte der Lease-Zeit abgelaufen ist, sendet der Client eine weitere REQUEST-Nachricht. Da er zu diesem Zeitpunkt noch über eine gültige IP-Adresse verfügt sendet er die Nachricht nicht als Broadcast, sondern als Unicast direkt an den DHCP-Server von dem er die IP zugewiesen bekommen hat. In dem Fall, das er auf die Request keine Antwort bekommen hat, startet er nach Ablauf der Lease Zeit wieder mit einen DISCOVER.
-
+Nachdem die hälfte der Lease-Zeit abgelaufen ist, sendet der Client eine weitere REQUEST-Nachricht. Da er zu diesem Zeitpunkt noch über eine gültige IP-Adresse verfügt sendet er die Nachricht nicht als Broadcast, sondern als Unicast direkt an den DHCP-Server, von dem er die IP zugewiesen bekommen hat. In dem Fall, das er auf die Request keine Antwort bekommen hat, startet er nach Ablauf der Lease Zeit mit einen DISCOVER.
 
 
 Während dieses Vorgangs können neben der IP auch noch andere Informationen abgefragt werden. Wie beispielsweise die Adressen von DNS- und Zeitservern.
