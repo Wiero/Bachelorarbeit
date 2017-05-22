@@ -1,6 +1,12 @@
 \chapter{Implementierung}
+Im Rahmen dieser Arbeit wurde ein TCP Stack für die API des AMIDAR Microprozessor entwickelt. Darüber hinaus wurde 
 
 \section{Überblick}
+Vor Beginn dieses Projekts verfügte die AMIDAR Java API über Grundlegende Netzwerk Funktionen. Dazu gehört der Netzwerktreiber, ein IP-Stack mit ARP Funktionalität und ein UDP Stack. Neu geschrieben wurde im Rahmen dieses Projekts der Multithreading Fähige TCP Stack. Dieser wurde in die vorhandene Software Integriert. Desweiteren wurde der IP-Stack erweitert und optimiert. \\
+Sowohl beim Senden als auch beim Empfangen von Datenpaketen greifen die einzelnen Module in einander über. Zum empfangen von Daten Prüft der Prozess des Netzwerktreibers ob neue Ethernet Frames vorliegen. Wenn das der Fall wird, eine Funktion im IP Stack aufgerufen, die die Ethernet Frames überprüft. Der IP-Stack unterscheidet die Pakete zwischen ARP und IP. ARP anfrage werden geprüft und gegebenenfalls beantwortet. Handelt es sich bei den Datagramm um ein IP-Paket, wird ein entsprechendes Objekt erzeugt und nach weiterer Überprüfung entweder an den UDP-Stack oder an den TCP-Stack übergeben. Die Stacks für TCP und UDP beinhalten jeweils einen Table mit den vorhandenen Verbindungen, die durch Ziel und Quell Port identifiziert werden können. Ihnen können gegebenenfalls die Erzeugten Pakete weiter gegeben werden, wo sie zwischengespeichert werden. Im Falle von UDP wird von den dieses die Payload ausgelesen, wenn auf "receive"{} Methode der UDP-Connection, von einen anderen Thread aufgerufen wird. Die TCP-Connections können jeweils in ihren eigenen Thread laufen, da eine Zeitnahe Verarbeitung der angekommen Pakete nötig ist um die Verbindung zu managen. In diesem Thread werden die angekommenen Pakete ausgewertet und die dazu entsprechenden Reaktionen berechnet und ausgeführt. \\
+Wenn UDP Datenpakete versendet werden sollen, wird die {}"Send"{} Methode aufgerufen, die ein UDP-Paket erzeugt und diesen an den UDP-Stack weitergibt. Der wiederum ruft den erzeugt aus dem UDP-Paket ein IP-Paket. Mit dem die {}"Send"{} Methode des IP-Stacks aufgerufen wird. Die letztendlich einen Ethernetframe erzeugt und mit den EthernetWrapper den Sendevorgang startet.\\ 
+Bei dem senden von über TCP wird 
+
 
 
 \section{TCP Stack}
