@@ -10,11 +10,42 @@ Bei dem senden von Daten über TCP wird von der Anwendung der ebenfalls die {}"S
 
 
 \section{IP Stack}
+Der IP Stack erfüllt mehrere Funktionen, die für eine zuverlässige Netzwerkkommunikation benötigt werden. Dazu gehört, das Senden und Empfangen von IP-Pakten, als auch die Unterstützung der ARP Funktionalitäten.
+
+\subsection{Empfangen von IP Paketen}
+
+Die Methode readIpPakets() des IP-Stacks, die vom Netzwerktreiber Thread aufgerufen. In dieser werden in einer Schleife die angekommenen Ethernet Pakete eingelesen und die IP Pakete dazu erzeugt. Dabei werden im Zweifelsfall Fragmente von fragmentierten Paketen zwischengespeichert, bis diese vollständig sind. \\
+Bei den so erzeugten IP-Paketen wird das darüber liegende Protokoll ausgelesen.\\
+Damit UDP und TCP Pakete zugestellt werden können müssen die jeweiligen Stacks im IP-Stack registriert werden. Nach der Registrierung können angekommene  Pakete den jeweiligen Stack zugeordnet werden. Dafür implementieren beide Stacks die Function "notificateByIpStack()" der eine Liste mit angekommenen UDP-Paketen übergeben wird. 
+
+\subsubsection{Fragmentierung}
+
+IP Pakete können während der Übertragung fragmentiert werden. Um über Netzwerke mit einer zu niedrigen Maximalen Segment Größe übertragen zu werden. Diese werden vom Empfänger defragmentiert. \\
+Fragmentierte Pakete können nach der dem erzeugen erkannt werden, in dem das entsprechende Flag ausgelesen wird. Die Flag gibt nicht explizit an, das diesen Paket Teil eines größeren fragmentierten Pakets ist, sondern dass sie ein Teil eines fragmentierten Pakets sind und weitere Pakete Fragmente folgen. Das bedeutet, dass das letzte Fragment eines Pakets nicht das Flag gesetzt hat, dieses kann man daran erkennen, dass der Fragment Offset ungleich Null ist\\
+Der IP Stack enthält eine Liste von für Fragmentierte Pakete, die Listen mit jeweils zusammengehörigen Fragmenten enthält. Wannn immer ein Paket ankommt, bei dem die {}"More Fragments"{} Flag gesetzt ist oder die Data Offset ungleich Null ist, wird geprüft, ob dieses zu einem der fragmentierten Pakete gehört, und wird in diesem Fall an eine der Listen hinzugefügt. Die Zugehörigkeit wird dabei anhand der Identification des IP Pakets geprüft. \\
+Falls ein Paket ohne Flag einen anderen Fragmentierten Paket zugeordnet werden kann, ist dieses das letzte Fragment des ursprünglichen IP Pakets, mit dem das kombinierte Paket erzeugt werden kann. \\
+Für diesen Zweck verfügt die Klasse IpPaket über die statische Methode "{}fuseFragmentedIpPackets()"{}, die eine Liste von zusammengehörigen IP-Paket Fragmenten annimmt. Diese werden auf Kompatibilität geprüft, wobei auch die Größe der kombinierten Nutzlast berechnet wird. Die Fragmente müssen neben der identischen Identifikation über die selbe Quell und Ziel IP-Adresse verfügen. Des weiteren müssen die Angaben des Frame Offsets mit der Paketlänge Plausibel sein. \\
+Anschließend werden die Pakete wird ein Array der entsprechenden Länge erzeugt und die Nutzlast der Pakete anhand des Frame Offsets zusammengesetzt. Danach kann der Konstruktor der IP-Paket Klasse aufgerufen werden, wobei ihm die neu kombinierte Nutzlast übergeben wird.  Das neu erzeugte Paket wird zurückgegeben und von dem IP-Stack weiter verarbeitet. 
+
+
+\subsection{Senden von IP Paketen}
+Der IP-Stack verfügt über die Methode "sendIpPaket", die im Normalfall von dem TCP- oder dem UDP-Stack aufgerufen wird. Diese nimmt ein übergebenes IP-Paket an und generiert daraus einen Ethernet Frame. Daraufhin wird das Packet über Ethernet versendet. 
+
+
+\subsection{Address Resolution Protokoll (ARP)}
+Das ARP Protokoll wird verwendet um in einen lokalen Netzwerk die IP Adressen zu den physischen MAC-Adressen aufzulösen. Ein Host, kann einer ARP-Request als Broadcast verschicken um die MAC-Adresse zu erfahren, über die der die Netzwerkressource mit der IP-Adresse zu erreichen ist. 
+
+Der IP-Stack verfügt über die Möglichkeit ankommende ARP Pakte zu verarbeiten. Für den Fall, das es sich bei einen ankommenden Datenpaket anstatt eines IP-Pakets um ein ARP-Paket handelt, wird geprüft, ob es sich um eine {}"Request"{} oder eine {}"Response"{} handelt. Für den Fall, das es sich um eine Request handelt, wird in einer entsprechenden Antwort die eigene physische MAC Adresse verschickt. 
+
+
+
+
+
 
 \section{TCP Stack}
 
 \section{Zero Copy}
-Die TCP und IP Pakete werden jeweils durch eine entsprechende Klasse repräsentiert. Die Objekte dieser Klasse enthalten jeweils ein Array, dass Header und Nutzdaten des Pakets enthält. Beide Klassen verfügen über einen Konstruktor, der jeweils die andere der beiden Klassen als Parameter entgegen nimmt. So kann beim Senden aus einen TCP-Paket ein IP-Paket erzeugt werden und beim Empfangen aus einen IP-Paket ein TCP-Paket erzeugt werden. Dabei stellt das TCP-Paket die Nutzlast des IP-Pakets da. Um in diesen Fall lange Kopiervorgänge zu ersparen wird es vermieden ein neues Array anzulegen und die Daten rein zu kopieren. Anstelle dessen wird in der TCP-Paket Klasse im Array ein 20 Byte Puffer eingeplant, in dem der IP-Header später geschrieben werden kann. Bei der Erzeugung eines IP-Pakets aus einen TCP-Paket wird das im TCP-Paket erzeugte Array weiterverwenden und da die ersten 20 Byte leer sind, kann dort der IP Header reingeschrieben werden. 
+Die TCP und IP Pakete werden jeweils durch eine entsprechende Klasse repräsentiert. Die Objekte dieser Klasse enthalten jeweils ein Array, dass Header und Nutzdaten des Pakets enthält. Beide Klassen verfügen über einen Konstruktor, der jeweils die andere der beiden Klassen als Parameter entgegen nimmt. So kann beim Senden aus einen TCP-Paket ein IP-Paket erzeugt werden und beim Empfangen aus einen IP-Paket ein TCP-Paket erzeugt werden. Dabei stellt das TCP-Paket die Nutzlast des IP-Pakets da. Um in diesen Fall lange Kopiervorgänge zu ersparen wird es vermieden ein neues Array anzulegen und die Daten rein zu kopieren. Anstelle dessen wird in der TCP-Paket Klasse im Array ein 20 Byte Puffer eingeplant, in dem der IP-Header später geschrieben werden kann. Bei der Erzeugung eines IP-Pakets aus einen TCP-Paket wird das im TCP-Paket erzeugte Array weiterverwenden und da die ersten 20 Byte leer sind, kann dort der IP Header geschrieben werden. 
 
 
 \section{DHCP}
