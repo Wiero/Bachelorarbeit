@@ -48,9 +48,11 @@ Beim versenden eines IP-Pakets muss ein Ethernet-Paket erzeugt werden. Dafür wi
 
 \subsection{TCP Stack}
 Der TCP Stack stellt den Datenaustausch zwischen der einzelnen TCP-Verbindungen und dem IP-Stack her und ist dabei in der Lage mehrere Verbindung parallel offen zu haben und diese einzeln zu verwalten. 
-Er enthält eine Map mit allen angelegten TCP Verbindungen. Es gibt eine Funktion um neue TCP-Verbindungen zu registrieren. Eine der wichtigsten Methoden ist "notificateByIpStack()", die vom IP-Stack aufgerufen wird und eine List von TCP-Paketen übergibt. Der TCP Stack untersucht diese und überprüft sie anhand der Checksumme auf Korrektheit. Fehlerhafte Pakete werden aussortiert. Die anderen werden abhängig von der Ziel-Port-Nummer an eine der TCP-Verbindungen übergeben.  
+Er enthält eine Map mit allen angelegten TCP Verbindungen. Es gibt eine Funktion um neue TCP-Verbindungen zu registrieren. Eine der wichtigsten Methoden ist "notificateByIpStack()", die vom IP-Stack aufgerufen wird und eine List von TCP-Paketen übergibt. Der TCP Stack untersucht diese und überprüft sie anhand der Checksumme auf Korrektheit. Fehlerhafte Pakete werden aussortiert. Fehlerfreie werden abhängig von der Ziel-Port-Nummer an eine der TCP-Verbindungen übergeben, oder verworfen, wenn diese keiner Verbindung zugeordnet werden können.   
 
 \subsection{TCP Verbindung}
+Die Klasse "{}TcpConnection"{} verwaltet die Zustände und Datenströme einer Verbindung. 
+
 
 \section{Zero Copy}
 Die TCP und IP Pakete werden jeweils durch eine entsprechende Klasse repräsentiert. Die Objekte dieser Klasse enthalten jeweils ein Array, dass Header und Nutzdaten des Pakets enthält. Beide Klassen verfügen über einen Konstruktor, der jeweils die andere der beiden Klassen als Parameter entgegen nimmt. So kann beim Senden aus einen TCP-Paket ein IP-Paket erzeugt werden und beim Empfangen aus einen IP-Paket ein TCP-Paket erzeugt werden. Dabei stellt das TCP-Paket die Nutzlast des IP-Pakets da. Um in diesen Fall lange Kopiervorgänge zu ersparen wird es vermieden ein neues Array anzulegen und die Daten rein zu kopieren. Anstelle dessen wird in der TCP-Paket Klasse im Array ein 20 Byte Puffer eingeplant, in dem der IP-Header später geschrieben werden kann. Bei der Erzeugung eines IP-Pakets aus einen TCP-Paket wird das im TCP-Paket erzeugte Array weiterverwenden und da die ersten 20 Byte leer sind, kann dort der IP Header geschrieben werden. 
