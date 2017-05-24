@@ -33,17 +33,24 @@ Der IP-Stack verfügt über die Methode "sendIpPaket", die im Normalfall von dem
 
 
 \subsection{Address Resolution Protokoll (ARP)}
-Das ARP Protokoll wird verwendet um in einen lokalen Netzwerk die IP Adressen zu den physischen MAC-Adressen aufzulösen. Ein Host, kann einer ARP-Request als Broadcast verschicken um die MAC-Adresse zu erfahren, über die der die Netzwerkressource mit der IP-Adresse zu erreichen ist. 
+Das ARP Protokoll wird verwendet um in einen lokalen Netzwerk die IP Adressen zu den physischen MAC-Adressen aufzulösen. Ein Host, kann einer ARP-Request als Broadcast verschicken um die MAC-Adresse zu erfahren, über die der die Netzwerkressource mit der IP-Adresse zu erreichen ist. \\
 
-Der IP-Stack verfügt über die Möglichkeit ankommende ARP Pakte zu verarbeiten. Für den Fall, das es sich bei einen ankommenden Datenpaket anstatt eines IP-Pakets um ein ARP-Paket handelt, wird geprüft, ob es sich um eine {}"Request"{} oder eine {}"Response"{} handelt. Für den Fall, das es sich um eine Request handelt, wird in einer entsprechenden Antwort die eigene physische MAC Adresse verschickt. 
+Der IP-Stack verfügt über die Möglichkeit ankommende ARP Pakte zu verarbeiten. Für den Fall, das es sich bei einen ankommenden Datenpaket anstatt eines IP-Pakets um ein ARP-Paket handelt, wird geprüft, ob es sich um eine {}"Request"{} oder eine {}"Response"{} handelt. Für den Fall, das es sich um eine Request handelt, wird in einer entsprechenden Antwort die eigene physische MAC Adresse verschickt. \\
 
-
-
-
+Beim versenden eines IP-Pakets muss ein Ethernet-Paket erzeugt werden. Dafür wird die MAC-Adresse unter der das Ziel oder die nächste Station auf dem Weg zu diesen erreichbar ist benötigt. Für diesen Zweck verfügt der IP-Stack über eine Hash-Map, die als ARP-Cache dient. In dem Fall, das für die IP kein Eintrag mit MAC-Adresse vorliegt, wird eine ARP-Request gesendet und auf deren Antwort gewartet. Nachdem die ARP-Response eingetroffen ist wird die IP-Adresse mit der MAC-Adresse verknüpft und in den dem ARP-Cache gespeichert. 
 
 
 
-\section{TCP Stack}
+
+
+
+\section{TCP}
+
+\subsection{TCP Stack}
+Der TCP Stack stellt den Datenaustausch zwischen der einzelnen TCP-Verbindungen und dem IP-Stack her und ist dabei in der Lage mehrere Verbindung parallel offen zu haben und diese einzeln zu verwalten. 
+Er enthält eine Map mit allen angelegten TCP Verbindungen. Es gibt eine Funktion um neue TCP-Verbindungen zu registrieren. Eine der wichtigsten Methoden ist "notificateByIpStack()", die vom IP-Stack aufgerufen wird und eine List von TCP-Paketen übergibt. Der TCP Stack untersucht diese und überprüft sie anhand der Checksumme auf Korrektheit. Fehlerhafte Pakete werden aussortiert. Die anderen werden abhängig von der Ziel-Port-Nummer an eine der TCP-Verbindungen übergeben.  
+
+\subsection{TCP Verbindung}
 
 \section{Zero Copy}
 Die TCP und IP Pakete werden jeweils durch eine entsprechende Klasse repräsentiert. Die Objekte dieser Klasse enthalten jeweils ein Array, dass Header und Nutzdaten des Pakets enthält. Beide Klassen verfügen über einen Konstruktor, der jeweils die andere der beiden Klassen als Parameter entgegen nimmt. So kann beim Senden aus einen TCP-Paket ein IP-Paket erzeugt werden und beim Empfangen aus einen IP-Paket ein TCP-Paket erzeugt werden. Dabei stellt das TCP-Paket die Nutzlast des IP-Pakets da. Um in diesen Fall lange Kopiervorgänge zu ersparen wird es vermieden ein neues Array anzulegen und die Daten rein zu kopieren. Anstelle dessen wird in der TCP-Paket Klasse im Array ein 20 Byte Puffer eingeplant, in dem der IP-Header später geschrieben werden kann. Bei der Erzeugung eines IP-Pakets aus einen TCP-Paket wird das im TCP-Paket erzeugte Array weiterverwenden und da die ersten 20 Byte leer sind, kann dort der IP Header geschrieben werden. 
