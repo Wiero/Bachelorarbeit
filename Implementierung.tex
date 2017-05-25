@@ -12,6 +12,8 @@ Bei dem senden von Daten über TCP wird von der Anwendung der ebenfalls die {}"S
 \section{IP Stack}
 Der IP Stack erfüllt mehrere Funktionen, die für eine zuverlässige Netzwerkkommunikation benötigt werden. Dazu gehört, das Senden und Empfangen von IP-Pakten, als auch die Unterstützung der ARP Funktionalitäten.
 
+\subsection{IP Paket}
+
 \subsection{Empfangen von IP Paketen}
 
 Die Methode readIpPakets() des IP-Stacks, die vom Netzwerktreiber Thread aufgerufen. In dieser werden in einer Schleife die angekommenen Ethernet Pakete eingelesen und die IP Pakete dazu erzeugt. Dabei werden im Zweifelsfall Fragmente von fragmentierten Paketen zwischengespeichert, bis diese vollständig sind. \\
@@ -40,7 +42,7 @@ Der IP-Stack verfügt über die Möglichkeit ankommende ARP Pakte zu verarbeiten
 Beim versenden eines IP-Pakets muss ein Ethernet-Paket erzeugt werden. Dafür wird die MAC-Adresse unter der das Ziel oder die nächste Station auf dem Weg zu diesen erreichbar ist benötigt. Für diesen Zweck verfügt der IP-Stack über eine Hash-Map, die als ARP-Cache dient. In dem Fall, das für die IP kein Eintrag mit MAC-Adresse vorliegt, wird eine ARP-Request gesendet und auf deren Antwort gewartet. Nachdem die ARP-Response eingetroffen ist wird die IP-Adresse mit der MAC-Adresse verknüpft und in den dem ARP-Cache gespeichert. 
 
 
-
+ 
 
 
 
@@ -51,14 +53,89 @@ Der TCP Stack stellt den Datenaustausch zwischen der einzelnen TCP-Verbindungen 
 Er enthält eine Map mit allen angelegten TCP Verbindungen. Es gibt eine Funktion um neue TCP-Verbindungen zu registrieren. Eine der wichtigsten Methoden ist "notificateByIpStack()", die vom IP-Stack aufgerufen wird und eine List von TCP-Paketen übergibt. Der TCP Stack untersucht diese und überprüft sie anhand der Checksumme auf Korrektheit. Fehlerhafte Pakete werden aussortiert. Fehlerfreie werden abhängig von der Ziel-Port-Nummer an eine der TCP-Verbindungen übergeben, oder verworfen, wenn diese keiner Verbindung zugeordnet werden können.   
 
 \subsection{TCP Verbindung}
-Die Klasse "{}TcpConnection"{} verwaltet die Zustände und Datenströme einer Verbindung. 
+Die Klasse "{}TcpConnection"{} verwaltet die Zustände und Datenströme einer Verbindung. Die Klasse stellt zum einen die Verbindung zu der Anwendung da, und zum enthält sie den Zustandsautomaten, der die Abläufe bei dem Aufbauen und Aufrechterhalten der Verbindung managen. Desweiteren befindet sich in dieser der Transmission Control Block (TCB), der nach dem öffnen einer Verbindung die meisten für diese spezifischen Variablen enthält.   
 
+\subsection{TCP-Paket}
+
+\subsubsection{Struktur Zustandsautomat}
+Eine TCP-Verbindung muss auf eine Reihe von Ereignissen Abhängig von der Aktellen Situation reagieren, dabei bietet sich ein Zustandsautomat an, der jeden Zustand durch eine eigene Klasse abstrahiert. Da es bei der momentan von AMIDAR unterstützen JAVA Version 1.4 noch keine Unterstützung für Enumerationen gibt werden die einzelnen Zustände in einen Array von "{}TcpClass"{} gespeichert. "{}TcpClass{}" ist dabei das Interface das alle Statusklassen implementiert. Der aktuelle Zustand wird jeweils von der Integer Variable {}"actualState"{} angegeben, welche die Position im Zustandsarray angibt. In dem Fall, das eine der zustandsabhängigen Methoden aufgerufen werden soll, wird diese auf das Array aufgerufen, wobei actualState als Index genutzt wird. Das von den Zustandsklassen implementierte Interface enthält folgende Methoden.  
+\begin{description}
+\item[activeOpen] Öffnet eine Verbindung und versucht mit dem übergeben Port und IP-Adresse den Drei-Wege-Handshake zu initiieren. 
+\item[passiveOpen] Öffnet eine Verbindung auf die von anderen Geräten ein Verbindungsaufbau initiert werden kann. 
+\item[send] Schreibt übergebene Daten in den Sende Puffer des TCP-Stacks und erzeugt gegebenenfalls ein neues TCP-Paket, welches die übergebenen Daten verschickt. 
+\item[receive] Überprüft, ob genug Daten vorhanden sind, um diese an die Anwendung zu übergeben. 
+\item[close] Signalisiert, das alle Daten übertragen wurden, und die Verbindung abgebaut werden kann. 
+\item[abort] Bricht die Verbindung ab.
+\item[segmentArrive] Untersucht und verarbeitet ein ankommendes TCP-Paket.
+\item[RexmtTimeout] Wird aufgerufen, nachdem ein Timeout für ein Paket in der Retransmit Queue aufgetreten ist. 
+\end{description}
+Jede dieser Methoden gibt als Integer den nächsten Zustands zurück. {}"Active Open"{}, {}"Passive Open"{}, {}"send"{}, {}"receive"{}, {}"close"{} und "{}abort"{} werden durch Aufrufe der Darüber liegenden Anwendung ausgelöst. {}"Segment Arrive"{} wird aufgerufen, nachdem vom TCP-Stack angekommene Pakete übergeben wurden und der Thread der Verbindung ausgeführt wird. 
+{}"RexmtTimeout"{} wird aufgerufen, wenn der retransmit Timer für ein Paket ausläuft. Um zu starke Schwankungen bei der RTO zu vermeiden wird eine geglättete Round trip
+
+/subsubsection{Neue Übertragung verlorener Pakete}
+Jedes gesendete Paket wird mit einen Zeitstempel versehen und der Retransmitqueue hinzugefügt. Der Zeitstempel des ersten Elementes von dieser, dem ältesten Paket in dieser, wird als Basis genommen um zu bestimmen, ob ein Timeout vorliegt. Die vergangene Zeit, bis ein Retransmit ausgelöst wird, wird nicht willkürlich gewählt, da es so bei Verbindung mit hoher Latenz Pakete neu versendet würden, die nicht verloren gegangen sind. Diese Zeit, RTO genannt, wird abhängig von der Round Trip Time (RTT) berechnet. Die Round Trip Time gibt die Zeit an die vergeht, nach dem ein Paket übergeben wurde, bis das Acknowledgement für dieses Paket eingetroffen ist.  Um zu starke Schwankungen bei der RTO zu vermeiden wird eine geglättete Round Trip Time verwendet. \\
+$SRTT = (\alpha * SRTT) + ((1-\alpha)*RTT)$\\
+$RTO = min [u, max [o, (\beta *SRTT)]]$\\\\
+Der Glättungsfaktor $\alpha$ wird zwischen 0,8 und 0,9 festgelegt. $\beta$ ist ein Varianzfaktor und wird auf einen Wert zwischen 1,3 und 2,0 gesetzt. {}"u"{} und {}"o"{} stellen die obere und untere Grenze da und werden Beispielsweise auf eine Sekunde bzw. eine Minute gesetzt.
+
+
+\subsubsection{Transmission Control Block(TCB)}
+
+Der Transmission Control Block enthält alle für die Verbindung wichtigen Variablen, abgesehen von der Zustandsvariable.  Dazu gehören der eigene Port und der Port des Zielrechners, die eigene IP Adresse und die der Gegenstelle. Darüber hinaus werden die Sequenznummern sowohl zum Empfangen als auch zum Senden gespeichert.  Des weiteren finden sich dort alle Variablen, die zur Congestion Contol benötigt werden.  
+
+
+\subsubsection{Zustände im Detail}
+
+\begin{description}
+%\subsub
+\item[CLOSED]
+
+\item[LISTEN]
+
+\item[SYN-RECEIVED]
+	
+\item[SYN-SEND]
+	
+\item[ESTABLISHED]
+
+\item[CLOSE-WAIT]
+
+\item[LAST-ACK]
+
+\item[CLOSING]
+
+\item[TIME-WAIT]
+
+\item[FIN-WAIT-1]
+
+\item[FIN-WAIT-2]	
+	\begin{itemize}
+		\item[active open]
+		\item[passive open]
+		\item[send]
+		\item[receive]
+		\item[close]
+		\item[abort]
+		\item[segment Arrive]
+		\item[Timeout]
+	\end{itemize}
+
+\end{description}
+\subsubsection{Options}
 
 \section{Zero Copy}
-Die TCP und IP Pakete werden jeweils durch eine entsprechende Klasse repräsentiert. Die Objekte dieser Klasse enthalten jeweils ein Array, dass Header und Nutzdaten des Pakets enthält. Beide Klassen verfügen über einen Konstruktor, der jeweils die andere der beiden Klassen als Parameter entgegen nimmt. So kann beim Senden aus einen TCP-Paket ein IP-Paket erzeugt werden und beim Empfangen aus einen IP-Paket ein TCP-Paket erzeugt werden. Dabei stellt das TCP-Paket die Nutzlast des IP-Pakets da. Um in diesen Fall lange Kopiervorgänge zu ersparen wird es vermieden ein neues Array anzulegen und die Daten rein zu kopieren. Anstelle dessen wird in der TCP-Paket Klasse im Array ein 20 Byte Puffer eingeplant, in dem der IP-Header später geschrieben werden kann. Bei der Erzeugung eines IP-Pakets aus einen TCP-Paket wird das im TCP-Paket erzeugte Array weiterverwenden und da die ersten 20 Byte leer sind, kann dort der IP Header geschrieben werden. 
+Die TCP und IP Pakete werden jeweils durch eine entsprechende Klasse repräsentiert. Die Objekte dieser Klasse enthalten jeweils ein Array, dass Header und Nutzdaten des Pakets enthält. Beide Klassen verfügen über einen Konstruktor, der jeweils die andere der beiden Klassen als Parameter entgegen nimmt. So kann beim Senden aus einen TCP-Paket ein IP-Paket erzeugt werden und beim Empfangen aus einen IP-Paket ein TCP-Paket erzeugt werden. Dabei stellt das TCP-Paket die Nutzlast des IP-Pakets da. Um in diesen Fall lange Kopiervorgänge zu ersparen wird es vermieden ein neues Array anzulegen und die Daten rein zu kopieren. Anstelle dessen wird in der TCP-Paket Klasse im Array ein 20 Byte Puffer eingeplant, in dem der IP-Header später geschrieben werden kann. Bei der Erzeugung eines IP-Pakets aus einen TCP-Paket wird das im TCP-Paket erzeugte Array weiterverwenden und da die ersten 20 Byte leer sind, kann dort der IP Header geschrieben werden.
 
 
 \section{DHCP}
+Das Dynamic Host Control Protocol verwendet UDP in der Transportschicht um die Nachrichten zu senden. Bei der Implementierung muss eine Repräsentation der Pakete geschrieben werden um DHCP Pakete verarbeiten zu können. Des weiter wird eine Klasse benötigt, die den Ablauf und die Kommunikation verarbeitet. 
+
+\subsection{DHCP-Paket}
+Die Klasse "DHCPPacket" repräsentiet DHCP Pakete. Diese enthält ein Array, welches das die Paketdaten enthält.  
+
+
+
+\subsection{DHCP-Controller}
 
 \section{TCP Software Interface}
 
