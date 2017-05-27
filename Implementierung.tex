@@ -13,6 +13,7 @@ Bei dem senden von Daten über TCP wird von der Anwendung der ebenfalls die {}"S
 Der IP Stack erfüllt mehrere Funktionen, die für eine zuverlässige Netzwerkkommunikation benötigt werden. Dazu gehört, das Senden und Empfangen von IP-Pakten, als auch die Unterstützung der ARP Funktionalitäten.
 
 \subsection{IP Paket}
+Für die Repräsentation von IP-Paket wird die Klasse "IpPacket" genutzt. Diese Enthält die Daten des Pakets in einen Array. Neben Methoden, welche die einzelne Felder des Header zurück geben gibt es Konstruktoren die als Parameter TCP, UDP oder Ethernet Pakete entgen nehmen. Des  weiteren gibt es Methoden zur Berechnung der Checksumme und der Umwandlung von String Repräsentation von IP Adressen zu Integer Werten.  
 
 \subsection{Empfangen von IP Paketen}
 
@@ -56,6 +57,8 @@ Er enthält eine Map mit allen angelegten TCP Verbindungen. Es gibt eine Funktio
 Die Klasse "{}TcpConnection"{} verwaltet die Zustände und Datenströme einer Verbindung. Die Klasse stellt zum einen die Verbindung zu der Anwendung da, und zum enthält sie den Zustandsautomaten, der die Abläufe bei dem Aufbauen und Aufrechterhalten der Verbindung managen. Desweiteren befindet sich in dieser der Transmission Control Block (TCB), der nach dem öffnen einer Verbindung die meisten für diese spezifischen Variablen enthält.   
 
 \subsection{TCP-Paket}
+TCP-Pakete werden von einer Klasse repäsentiert, welche die Daten des Paktes in einen Array speichert, auf dessen Datenfelder mit entsprechenden Methoden gezielt zugegriffen werden kann. Außerdem gibt es Methoden zur Berechnung der Prüfsumme.
+
 
 \subsubsection{Struktur Zustandsautomat}
 Eine TCP-Verbindung muss auf eine Reihe von Ereignissen Abhängig von der Aktellen Situation reagieren, dabei bietet sich ein Zustandsautomat an, der jeden Zustand durch eine eigene Klasse abstrahiert. Da es bei der momentan von AMIDAR unterstützen JAVA Version 1.4 noch keine Unterstützung für Enumerationen gibt werden die einzelnen Zustände in einen Array von "{}TcpClass"{} gespeichert. "{}TcpClass{}" ist dabei das Interface das alle Statusklassen implementiert. Der aktuelle Zustand wird jeweils von der Integer Variable {}"actualState"{} angegeben, welche die Position im Zustandsarray angibt. In dem Fall, das eine der zustandsabhängigen Methoden aufgerufen werden soll, wird diese auf das Array aufgerufen, wobei actualState als Index genutzt wird. Das von den Zustandsklassen implementierte Interface enthält folgende Methoden.  
@@ -72,7 +75,7 @@ Eine TCP-Verbindung muss auf eine Reihe von Ereignissen Abhängig von der Aktell
 Jede dieser Methoden gibt als Integer den nächsten Zustands zurück. {}"Active Open"{}, {}"Passive Open"{}, {}"send"{}, {}"receive"{}, {}"close"{} und "{}abort"{} werden durch Aufrufe der Darüber liegenden Anwendung ausgelöst. {}"Segment Arrive"{} wird aufgerufen, nachdem vom TCP-Stack angekommene Pakete übergeben wurden und der Thread der Verbindung ausgeführt wird. 
 {}"RexmtTimeout"{} wird aufgerufen, wenn der retransmit Timer für ein Paket ausläuft. Um zu starke Schwankungen bei der RTO zu vermeiden wird eine geglättete Round trip
 
-/subsubsection{Neue Übertragung verlorener Pakete}
+\subsubsection{Neue Übertragung verlorener Pakete}
 Jedes gesendete Paket wird mit einen Zeitstempel versehen und der Retransmitqueue hinzugefügt. Der Zeitstempel des ersten Elementes von dieser, dem ältesten Paket in dieser, wird als Basis genommen um zu bestimmen, ob ein Timeout vorliegt. Die vergangene Zeit, bis ein Retransmit ausgelöst wird, wird nicht willkürlich gewählt, da es so bei Verbindung mit hoher Latenz Pakete neu versendet würden, die nicht verloren gegangen sind. Diese Zeit, RTO genannt, wird abhängig von der Round Trip Time (RTT) berechnet. Die Round Trip Time gibt die Zeit an die vergeht, nach dem ein Paket übergeben wurde, bis das Acknowledgement für dieses Paket eingetroffen ist.  Um zu starke Schwankungen bei der RTO zu vermeiden wird eine geglättete Round Trip Time verwendet. \\
 $SRTT = (\alpha * SRTT) + ((1-\alpha)*RTT)$\\
 $RTO = min [u, max [o, (\beta *SRTT)]]$\\\\
@@ -85,20 +88,45 @@ Der Transmission Control Block enthält alle für die Verbindung wichtigen Varia
 
 
 \subsubsection{Zustände im Detail}
+Sofern nicht anders beschrieben löst eine Timeout eines Pakets einen neue Übertragung von diesem aus, wonach es an dem Ende der Retransmission Queue, mit einen neuen Zeitstempel gespeichert wird. Wenn einer Paket nach dem 5. Timeout noch nicht angekommen sein sollte wird davon ausgegangen das, keine nutzbare Verbindung zum Host mehr existiert und die Verbindung wird abgebrochen. 
+Bei allen weiteren in den jeweiligen Zuständen nicht näher beschriebenen Aktionen wird eine IOException geworfen.
 
 \begin{description}
 %\subsub
 \item[CLOSED]
+In diesen Zustand wird auf einen auf bei einen "{}Activ Open"{} ein Verbindungsaufbau gestartet. Dafür wird die Initiale Sequenznummer zufällig generiert. Und ein SYN-Paket erzeugt. Anschließen wird die Send Unacknowledged Nummer auf den Wert der initialen Sequenznummer gesetzt und der Wert für die nächste Sendesequenznummer auf die um eins erhöhte intiale Sequenznummer gesetzt. Des weiteren wird der nächste Zustand auf SYN-SENT gesetzt. \\
+In dem Fall, das die Methode {}"passivOpen"{} aufgerufen wird, wird in den Zustand Listen gewechselt. \\
+In beiden Open Methoden wird die Verbindung im TCP-Stack registriert und es wird ein Transmission Control Block angelegt.\\
+Alle anderen Usercalls werden mit Fehlermeldungen beendet. 
 
 \item[LISTEN]
+Im Zustand LISTEN wird auf den einen Verbindungsaufbau von einen externen Host gewartet. Ein Active Open Usercall kann auch in diesen Zustand noch ausgeführt werden, mit dem selben Ablauf wie im Zustand CLOSED. Bei einen "Receive" Aufruf können noch keine Daten, zurückgegeben werden, da keine aktive Verbindung aufgebaut ist. Der "Receive" Usercall wird jedoch zwischengespeichert. 
+Die Calls "{}close"{} und "{}abort"{} löschen den TCB und gehen in den Zustand CLOSED zurück.
+Bei eintreffenden Paketen wird geprüft, ob es sich um ein SYN-Paket handelt. In diesem Fall wird die Initiale Sequenznummer berechnet und ein SYN-ACK Paket in die Paket-out-Queue abgelegt. Daraufhin geht die Verbindung in den Zustand SYN-RECEIVED über. Alle anderen eintreffenden Pakete deuten auf eine Fehlfunktion der Verbindung der Gegenstelle hin und werden mit einen RST Paket beantwortet. 
+
 
 \item[SYN-RECEIVED]
+In diesen Zustand werden Aufrufe der {}"send"{} und {}"receive"{} calls zwischengespeichert um in einen späteren Zustand ausgewertet zu werden. 
+Bei Ausführung eines {}"close"{} Calls wird geprüft, ob der Sendepuffer leer ist, wenn das nicht der Fall ist verbleibt die Verbindung im aktuellen Zustand, andernfalls wird ein FIN-Paket gesendet um das Ende der Verbindung einzuleiten. 
+Wird die "{}Abort"{} Funktion aufgerufen, wird ein RST-Packet gesendet, der TCB gelöscht und in den Zustand CLOSED zurück gegangen.\\ 
+
+Ankommende Pakte werden, nach Überprüfung der Gültigkeit anhand der Sequenznummer, ausgewertet. Ist da angekommen Paket ein ACK-Paket, wird das bestätigte Paket aus der RetransmitQueue entfernt und in den Established Zustand gewechselt. \\ Falls ein weiteres SYN- oder ein RST-Paket ankommen wird die Verbindung beendet. 
+
 	
 \item[SYN-SEND]
+Die Aktionen für "{}send"{} {}"receive"{}, {}"close"{} und "{}abort"{} werden genauso gehandhabt, wie im Zustand SYN-RECEIVED.
+Nach dem eintreffen, von gültigen SYN-ACK Paket wird in den Zustand ESTABLISHED gewechselt. Wenn ein eintreffendes Paket nur ein SYN-enthält wird der Zustand SYN-RECEIVED zurück gegeben und ein SYN-ACK-Paket gesendet. Bei einen Reset Paket wird die Verbindung abgebrochen. Allen anderen Pakete werden verworfen.   
 	
 \item[ESTABLISHED]
 
+In diesen Zustand beginnt die {}"send"{} Operation mit dem Speichern der übergebenen Daten in den Sendepuffer. Anschließen wird das maximale Limit an Daten bestimmt, die noch versendet werden dürfen. Dafür wird das Minimum von "Congestion Window", und "receiverWindow"{} genutzt. Anschließend wird ein Datenpaket erzeugt, wobei darauf geachtet, wird das dass Limit, auch die Maximale Segment Größe nicht überschritten wird. \\
+Ankommende Datenpakete werden einsortiert. Entspricht die Sequenznummer des Pakets der erwarteten Sequenznummer, können die Daten des Pakets in den Empfangspuffer geschrieben werden. Ist die Sequenznummer über der erwarteten Nummer, werden die Pakete in den "{}Out of Order"{}  Puffer zwischen gespeichert. Diese werden wenn das fehlende Paket ankommt, hinter diesen in den Empfangspuffer einsortiert. Jedes angekommene Paket wird mit einen ACK-Paket quittiert. Dabei ist zu beachten, das bei Paketen die nicht in der erwartenden Reihenfolge ankommen, die Sequenznummer des erwarteten Pakets als Acknowledge Nummer gesendet wird. Dadurch wird der Gegenseite signalisiert, das dieses Paket möglicherweise verloren gegangen ist. Dadurch enstehen duplizierte ACKs,  die für  "{}Fast Retransmit"{} und "{} Fast Recovery"{} essentiell ist.
+Des weiteren wird das mit dem Paket mitgeschickte ACK überprüft. Entspricht die Acknowledge Nummer den der letzten nicht bestätigten gesendeten Sequenznummer wird ein Zähler um eins hoch gesetzt um duplizierte ACKs zu erkennen. Bei einen mehr als drei Mal duplizierten ACK wird ein {}"Fast Retransmit"{} durchgeführt Dabei wird die Slow Start Threshold halbiert und die Größe des Congestion Windows auf den Wert von diesen gesetzt. Zusätzlich wird das verlorene Paket aus der "{}Retransmit Queue"{} rausgesucht und sofort neu übertragen. Wenn ein gültiges nicht dupliziertes ACK eintrifft werden alle bestätigten Segmente aus der Retransmit Queue entfernt und das Congestion Window entsprechend der Slow Start und Congestion Avoidance Algorithmen erhöht. Falls das FIN-Flag bei einen gültigen Paket gesetzt ist, wird der Zustand Close Wait zurück gegeben.  
+In dem Fall, das es zu dem Timeout eines Pakets kommt, wird die Slow Start Threshold ebenfalls halbiert und das Congestion Window auf den initialen Wert gesetzt. 
+
 \item[CLOSE-WAIT]
+
+
 
 \item[LAST-ACK]
 
@@ -109,6 +137,10 @@ Der Transmission Control Block enthält alle für die Verbindung wichtigen Varia
 \item[FIN-WAIT-1]
 
 \item[FIN-WAIT-2]	
+
+
+\end{description}
+
 	\begin{itemize}
 		\item[active open]
 		\item[passive open]
@@ -119,8 +151,6 @@ Der Transmission Control Block enthält alle für die Verbindung wichtigen Varia
 		\item[segment Arrive]
 		\item[Timeout]
 	\end{itemize}
-
-\end{description}
 \subsubsection{Options}
 
 \section{Zero Copy}
@@ -131,11 +161,13 @@ Die TCP und IP Pakete werden jeweils durch eine entsprechende Klasse repräsenti
 Das Dynamic Host Control Protocol verwendet UDP in der Transportschicht um die Nachrichten zu senden. Bei der Implementierung muss eine Repräsentation der Pakete geschrieben werden um DHCP Pakete verarbeiten zu können. Des weiter wird eine Klasse benötigt, die den Ablauf und die Kommunikation verarbeitet. 
 
 \subsection{DHCP-Paket}
-Die Klasse "DHCPPacket" repräsentiet DHCP Pakete. Diese enthält ein Array, welches das die Paketdaten enthält.  
-
-
+Die Klasse "DHCPPacket" repräsentiet DHCP Pakete. Diese enthält ein Integer Array, welches die Paketdaten enthält. Es gibt Getter Methoden, die mit Bitmaskierungen einzelne Datenfelder auslesen und deren Werte zurückgeben. Eine Schwierigkeit bei DHCP liegt darin begründet, das die meisten wichtigen Informationen nicht in den festen Felder, sondern in den variablen Optionsteil abgelegt werden. Um diese auszulesen musste ein Parser geschrieben werden, der den Optionsbereich einließt und nach dem übergeben Optionscode sucht. Wenn dieser gefunden wurde, werden anhand der folgenden Längenangabe die Optionsdaten ausgelesen. Beim Parsen muss beachtet werden, das Optionen byteweise eingelesen werden müssen, obwohl diese als 32 Bit Wörter vorliegen. 
 
 \subsection{DHCP-Controller}
+
+Der DHCP-Controller enthält, den Thread, welcher den DHCP-Client steuert. Für die Ablaufsteuerung wurde ebenfalls ein kleiner Zustandsautomat implementiert. Sobald der Thread gestartet wurde, wird eine Discover Nachricht als Broadcast gesendet und in den Zustand "SELECTING" gewechselt. In diesen Zustand wird auf eine "OFFER" Nachricht des Servers gewartet. Die DHCP Nachrichten werden identifiziert in dem der Optionscode 53 aus dem Optionsblock ausgelesen wird. Der Datenwert dieser Option gibt die Art des DHCP-Paketes an. Sobald ein DHCP- {}"OFFER"{} eintrifft, wird die Vorgeschlagene IP mit einer "REQUEST" angefragt und in den Zustand REQUESTING gewechselt. Bei dieser Anfrage wird die IP-Adresse mit den Optionscode 50 angefragt. Anschließend wird auf die "ACK" Nachricht gewartet, in dieser die IP-Adresse bestätigt wird. Anschließen muss noch mit einer ARP Request geprüft werden, ob diese Adresse schon von einen andern Host im Netzwerk verwendet wird. 
+
+\section{Packet Builder}
 
 \section{TCP Software Interface}
 
