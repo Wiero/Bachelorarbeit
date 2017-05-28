@@ -1,13 +1,15 @@
-\chapter{Grundlagen}
+\chapter{Grundlagen Netzwerk und AMIDAR}
+In diesem Kapitel werden die Grundlagen von AMIDAR und der für diese Arbeit genutzten Netzwerkprotokolle erläutert. 
 
 \section{Netzwerk Schichtenmodell}
 Netzwerk Kommunikation zwischen Anwendungen wird üblicherweise als Schichtenmodell beschrieben.  
-Die unterste Schicht stellt dabei das physical layer. Das beschreibt die Physische Übertragung von Daten. 
-Darüber sorgt die Sicherungsschicht für eine funktionierende Verbindung zwischen Endgeräten und den Übertragungsmedium. Auf dieser Schicht wird zum Beispiel das Ethernet Protokoll eingesetzt, das die übertragenen Daten auf Fehler überprüft und im Zweifel verwirft. 
-Darunter kommt die Vermittlungsschicht, in der die Endgeräte Adressiert werden und Routing und Datenflusskontrolle gesteuert werden. Ein wichtiges Protokoll dieser Schicht ist das IP Protokoll. \\
+Die unterste Schicht stellt dabei das {}"Physical Layer"{} da. Das beschreibt die Physische Übertragung von Daten. 
+Darüber sorgt die Sicherungsschicht für eine funktionierende Verbindung zwischen Endgeräten und dem Übertragungsmedium. Auf dieser Schicht wird zum Beispiel das Ethernet Protokoll eingesetzt, das Netzwerkteilnehmer über die MAC-Adresse im lokalen Netz adressiert, die übertragenen Daten auf Fehler überprüft und im Zweifel verwirft. 
+Darüber kommt die Vermittlungsschicht, in der die Endgeräte über mehrere Subnetze hinweg Adressiert werden und Routing und Datenflusskontrolle gesteuert werden. Ein wichtiges Protokoll dieser Schicht ist das IP Protokoll. \\
 % Bild Schichentmodell
-Bei einer Datenübertragung von einer Anwendung zu einer auf einen anderen Endgerät laufenden werden die Daten in durch die Schichten nach unten gereicht, wobei in jeder Schicht ein neuer Header erzeugt wird, der für die jeweilige Schicht wichtige Informationen enthält. Zum Beispiel werden die Daten von der Anwendung mit betriebsystemsabhängigen Systemaufrufen an den TCPStack übergeben. Dieser erzeugt ein TCP Paket, das außer den Daten einen Header enthält, welcher Information bereitstellt, die unter anderen für das richtige Zusammensetzen der einzelnen Datenpakte beim Empfänger, als auch für die Zuordnung der übertragen Daten zu der jeweiligen Anwendung benötigt werden. Bei der anschließenden Erzeugung des IP Pakets bilden das TCP Paket bestehend aus Daten und TCP-Header die zu übertragenden Daten. Der IP Header enthält unter anderen die IP-Adressen des Ziel und Quell Geräts. Das IP Paket bleibt im Normalfall unverändert, bis das Zielgerät erreicht ist. An der nächst unteren Ebene steht das Ethernet Datagramm. Es enthält neben dem IP Paket die Physischen Adressen von des Quell Endgeräts und der nächsten Zwischenstation auf dem Weg zum Ziel. Bei Zwischenstation wird anhand der der Daten des IP Pakets der nächste Wegpunkt ermittelt und ein neues Datagramm erzeugt. \\
-Wenn ein Datagramm das Ziel erreicht wird das IP Paket extrahiert und daraus das TCP Paket. Anhand der Port Nummer kann das TCP Paket der Anwendung zugeordnet werden.
+Bei einer Datenübertragung von einer Anwendung zu einer auf einen anderen Endgerät laufenden, werden die Daten durch die Schichten nach unten gereicht, wobei in jeder Schicht ein neuer Header erzeugt wird, der für die jeweilige Schicht wichtige Informationen enthält. Zum Beispiel werden die Daten von der Anwendung mit betriebsystemsabhängigen Systemaufrufen an den TCPStack übergeben. Dieser erzeugt ein TCP Paket, das außer den Daten einen Header enthält, welcher Information bereitstellt, die unter anderen für das richtige Zusammensetzen der einzelnen Datenpakte beim Empfänger, als auch für die Zuordnung der übertragen Daten zu der jeweiligen Anwendung benötigt werden.\\\\
+Bei der anschließenden Erzeugung des IP Pakets bilden das TCP Paket, bestehend aus Nutzdaten und TCP-Header die zu übertragenden Daten. Der IP Header enthält unter anderen die IP-Adressen des Ziel und Quell Geräts. Das IP Paket bleibt im Normalfall unverändert, bis das Zielgerät erreicht ist. An der nächst unteren Ebene steht das Ethernet Datagramm. Es enthält neben dem IP Paket die Physischen Adressen des Quell Endgeräts und der nächsten Zwischenstation, auf dem Weg zum Ziel. Bei Zwischenstationen wird anhand der Informationen des IP Headers der nächste Wegpunkt ermittelt und ein neues Datagramm erzeugt. \\
+Wenn ein Datagramm das Ziel erreicht, wird das IP Paket extrahiert und daraus das TCP Paket. Anhand der Port Nummer kann das TCP Paket der Anwendung zugeordnet werden.
 
 
 
@@ -15,8 +17,8 @@ Wenn ein Datagramm das Ziel erreicht wird das IP Paket extrahiert und daraus das
 
 Ethernet nach der IEEE Norm 802.3 ist seit den 90ern der am weitesten verbreitete Standard für Lokale Netzwerke und beschreibt sowohl die Bitübertragungs als auch die Sicherungsschicht. \\
 \subsection{Verfahren}
-Um zu ermöglichen das mehrere Endgeräte auf den selben Physischen Medium kommunizieren können wurde früher ein Zeitmultiplexverfahren eingesetzt, das durch den CSMA/CD Algorithmus gesteuert wird. Wenn eine Stelle Daten zum senden bereithält, wartet diese bis das Medium ungenutzt ist und fängt dann an die Daten zu übertragen. Wenn 2 Stellen gleichzeitig beginnen zu senden wechseln beide auf ein "Störung-Erkannt" Signalmuster und beenden die Übertragung. Nach einer zufällig langen Pause wird jeweils ein erneuter Übertragungsversuch gestartet.\\
-Mittlerweile werden Kollisionen durch die Einführung von Switches verhindert. In diesen können Ethernet Pakete zwischengespeichert werden bis diese gesendet werden können. Dadurch wird eine Vollduplex Übertragung zwischen Switches und anderen Endgeräten ermöglicht. Es kann jedoch vorkommen, das Switches bei zu großen Datenaufkommen überlastet werden weswegen die Ethernet Flow Control Datenpakete verwerfen kann. Deswegen ist es wichtig, das Protokolle auf den darüber liegenden Schichten verworfene Datenpakete erkennen und erneut senden können um eine zuverlässige Datenübertragung zu gewährleisten. 
+Um zu ermöglichen das mehrere Endgeräte auf den selben Physischen Medium kommunizieren können wurde früher ein Zeitmultiplexverfahren eingesetzt, das durch den CSMA/CD Algorithmus gesteuert wird. Wenn eine Stelle Daten zum senden bereithält, wartet diese bis das Medium ungenutzt ist und fängt dann an die Daten zu übertragen. Wenn 2 Stellen gleichzeitig zu Senden beginnen, wechseln beide auf ein Störung-Erkannt Signalmuster und beenden die Übertragung. Nach einer zufällig langen Pause wird jeweils ein erneuter Übertragungsversuch gestartet.\\
+Mittlerweile werden Kollisionen durch die Einführung von Switches verhindert. In diesen können Ethernet Pakete zwischengespeichert werden bis diese gesendet werden können. Dadurch wird eine Vollduplex Übertragung zwischen Switches und anderen Endgeräten ermöglicht. Es kann jedoch vorkommen, das Switches bei zu großen Datenaufkommen überlastet werden weswegen die Ethernet Flow Control Datenpakete verwerfen kann. Deswegen ist es wichtig, das Protokolle auf den darüber liegenden Schichten verworfene Datenpakete erkennen und wiederholt senden können um eine zuverlässige Datenübertragung zu gewährleisten. 
 
 \subsection{Ethernet Frame}
 
@@ -62,48 +64,58 @@ Es handelt sich bei TCP um ein verbindungsorientiertes Protokoll, das bedeutet, 
 
 %Hier Bild vom TCP Header einfügen. 
 
-Quell Port (16Bit): Gibt die Portnummer der Anwendung auf Senderseite an \\
-Ziel Port (16Bit): Gibt die Portnummer der Anwendung auf Empfängerseite an\\
-Sequence Number (32Bit):  \\
-Acknowledge Number (32Bit): \\
-Data Offset (4Bit):Anzahl von 32Bit Wörtern aus denen der Header besteht. \\
-Reserved (6Bit): reserviert für zukünftige Nutzung\\
-Steuerungsbits (6Bit): 6 Flags die für die Ablauf Steuerung der Übertragung genutzt werden: \\
-	URG: Urgent Pointer, wird in moderner Software nicht mehr genutzt und wird von vielen Implementierungen ignoriert. \\
-	ACK: Acknowledgment gibt an, ob das Paket eine gültige Bestätigung für empfangene Pakete enthält.\\
-	PSH: Push, ist dieses Flag gesetzt, werden die empfangenen Daten sofort an die Hostsoftware weitergereicht. 
-	RST: Resettet die Verbindung. Wird im Fehlerfall gesendet und bricht die Verbindung ab. 
-	FIN: Signalisiert das ende der Verbindung, wenn es keine zu übertragenen Daten gibt. \\\\
-Window (16Bits): Gibt die Größe des Emfpangswindows des Absenders an. Gilt für den Empfänger als obere Grenze des Congestion Windows\\
-Checksum (16Bits): Für die Berechnung der Checksumme über das TCP Paket wird vorher ein Pseudoheader bestehend aus den Quell- und Ziel IP-Adresse, des IP-Codes für das verwendete Protokoll und die Gesamtlänge des eigentlichen TCP Pakets. Die Checksumme wird daraufhin über den Pseudeheader, den Header und die Payload berechnet. Dafür werden diese in 16 Bit große Blöcke aufgeteilt und im einer Komplement die Summe über diese gebildet. \\
-UrgentPointer (16Bits): Gibt den Urgentpointer als Offset zu der Sequenznummer an. Wird nur interpretiert, wenn das URG Flag gesetzt ist.\\ 
-Options: (Variabel):  Optionale Informationen, die von TCP Implementierungen unterstützt werden können um Sicherheit und Performance zu verbessern. Optionen bestehen entweder nur aus einen Optionsbyte oder haben zusätzlich ein weiteres Byte das die Länge der jeweiligen Optionen angibt. 
-Padding: Falls der TCP Header mit den Optionen einen teilweise genutzten 32Bit Block hat, wird dieser mit Nullen aufgefüllt. 
+\begin{description}
 
+
+
+\item[Quell Port (16Bit): ] Gibt die Portnummer der Anwendung auf Senderseite an 
+\item[Ziel Port (16Bit): ] Gibt die Portnummer der Anwendung auf Empfängerseite an
+\item[Sequence Number (32Bit): ] Gibt die Sequenz Nummer des Pakets an.
+\item[Acknowledge Number (32Bit): ] Gibt die Acknowledge Nummer des Pakets an.
+\item[Data Offset (4Bit): ] Anzahl von 32Bit Wörtern aus denen der Header besteht. 
+\item[Reserved (6Bit): ] reserviert für zukünftige Nutzung
+\item[Steuerungsbits (6Bit): ] 6 Flags die für die Ablauf Steuerung der Übertragung genutzt werden: 
+\begin{itemize}
+\item[URG: ] Urgent Pointer, wird in moderner Software nicht mehr genutzt und wird von vielen Implementierungen ignoriert. 
+\item[ACK: ] Acknowledgment gibt an, ob das Paket eine gültige Bestätigung für empfangene Pakete enthält.
+\item[PSH: ] Push, ist dieses Flag gesetzt, werden die empfangenen Daten sofort an die Hostsoftware weitergereicht. 
+\item[RST: ] Resettet die Verbindung. Wird im Fehlerfall gesendet und bricht die Verbindung ab. 
+\item[FIN: ] Signalisiert das ende der Verbindung, wenn es keine zu übertragenen Daten gibt. 
+\end{itemize}
+\item[Window (16Bits): ] Gibt die Größe des Emfpangswindows des Absenders an. Gilt für den Empfänger als obere Grenze des Congestion Windows
+\item[Checksum (16Bits): ] Für die Berechnung der Checksumme über das TCP Paket wird vorher ein Pseudoheader bestehend aus den Quell- und Ziel IP-Adresse, des IP-Codes für das verwendete Protokoll und die Gesamtlänge des eigentlichen TCP Pakets. Die Checksumme wird daraufhin über den Pseudeheader, den Header und die Payload berechnet. Dafür werden diese in 16 Bit große Blöcke aufgeteilt und im einer Komplement die Summe über diese gebildet. 
+\item[UrgentPointer (16Bits): ] Gibt den Urgentpointer als Offset zu der Sequenznummer an. Wird nur interpretiert, wenn das URG Flag gesetzt ist.\
+\item[Options: (Variabel): ]  Optionale Informationen, die von TCP Implementierungen unterstützt werden können um Sicherheit und Performance zu verbessern. Optionen bestehen entweder nur aus einen Optionsbyte oder haben zusätzlich ein weiteres Byte das die Länge der jeweiligen Optionen angibt. 
+\item[Padding: ] Falls der TCP Header mit den Optionen einen teilweise genutzten 32Bit Block hat, wird dieser mit Nullen aufgefüllt. 
+\end{description}
 
 \subsection{Zustände}
 TCP ist im Gegensatz zu den bisher genannt Protokollen Zustandsorientiert, was bedeutet, das es ja nach Zustand anders auf Nutzeraktionen und ankommende Pakete reagiert. 
 Zu den Zuständen gehören :
-Closed : Das ist der Start zu stand einer TCP Instanz. Die Verbindung ist geschlossen. Usercalls außer "Open" werden mit Fehlermeldungen quittiert und ankommende Pakete werden verworfen und mit einen Reset-Paket beantwortet.\\
-SYN-sent: Nachdem eine Verbindung initiiert wurde, wird auf eine Antwort des "remote Hosts" gewartet. \\
-SYN-received : Nachdem ein SYN Pakte erhalten und ein SYN-ACK gesendet wurde wird auf das ACK gewartet, um den 3-Wege-Handschlag abzuschließen. \\
-ESTABLISHED: Nach dem der Verbindungsaufbau erfolgreich abgeschlossen wurde befinden sich beide Hosts im ESTABLISHED Zustand, in dem die eine Vollduplex Komminikation möglich ist. \\
-FIN-WAIT-1: Wenn ein Verbindungsabbau initiert wurde wird ein FIN Paket gesendet und in den Zustand FIN-WAIT-1 gewechselt und auf die Bestätigung des Erhalts gewartet. \\
-FIN-WAIT-2: In dem Fall das die Gegenstelle noch Daten zu übertragen hat, bleibt die Verbindung einseitig offen um die letzten Pakete zu empfangen. \\
-CLOSING:	\\
-TIME-WAIT: \\
 
+\begin{description}
+
+\item[CLOSED : ]Das ist der Start zu stand einer TCP Instanz. Die Verbindung ist geschlossen. Usercalls außer "Open" werden mit Fehlermeldungen quittiert und ankommende Pakete werden verworfen und mit einen Reset-Paket beantwortet.
+\item[SYN-SENT: ]Nachdem eine Verbindung initiiert wurde, wird auf eine Antwort des "remote Hosts" gewartet. 
+\item[SYN-RECEIVED : ] Nachdem ein SYN Pakte erhalten und ein SYN-ACK gesendet wurde wird auf das ACK gewartet, um den 3-Wege-Handschlag abzuschließen. 
+\item[ESTABLISHED: ] Nach dem der Verbindungsaufbau erfolgreich abgeschlossen wurde befinden sich beide Hosts im ESTABLISHED Zustand, in dem die eine Vollduplex Komminikation möglich ist. 
+\item[FIN-WAIT-1: ] Wenn ein Verbindungsabbau initiert wurde wird ein FIN Paket gesendet und in den Zustand FIN-WAIT-1 gewechselt und auf die Bestätigung des Erhalts gewartet. 
+\item[FIN-WAIT-2: ] In dem Fall das die Gegenstelle noch Daten zu übertragen hat, bleibt die Verbindung einseitig offen um die letzten Pakete zu empfangen. 
+\item[CLOSING: ]	Wartet auf das letzte ACK-Paket und wechselt, wenn dieses ankommt in den Zustand TIME-WAIT.
+\item[TIME-WAIT: ] Hält die Verbindung nach Beendigung einige Minuten offen, um auf verzögerte Pakete zu reagieren.
+\end{description}
 %add vereinfachter Zustandsautomat für TCP
 
 Zu den Zuständen kommen noch eine Reihe von Ereignissen auf, auf die, abhängig von den jeweiligen Zuständen entsprechend reagiert werden muss. 
-Dazu gehören neben eintreffenden Paketen und Timeouts die Usercalls.\\
-Active OPEN: Öffnet einen Port und initiiert den Verbindungsaufbau zu einen Remote Host.\\
-Passive OPEN: Öffnet einen Port ohne eine Verbindung zu initiieren und wartet auf einen Verbindungsaufbau,\\
-SEND: Fügt dem Sendepuffer Daten hinzu und sendet gegebenenfalls ein Datenpaket.\\
-RECEIVE: Überprüft, ob genug Daten vorhanden sind und gibt diese an die Anwendung zurück.\\
-CLOSE: Initiiert den Abbau der Verbindung, wenn es keine Daten mehr zu  übertragen gibt.\\
-ABORT: Bricht die Verbindung ab. In den meisten Zuständen wird in dem Fall ein Reset Paket gesendet. \\
-
+Dazu gehören neben eintreffenden Paketen und Timeouts die Usercalls.
+\begin{description}
+\item[Active OPEN: ]Öffnet einen Port und initiiert den Verbindungsaufbau zu einen Remote Host.
+\item[Passive OPEN: ] Öffnet einen Port ohne eine Verbindung zu initiieren und wartet auf einen Verbindungsaufbau,
+\item[SEND: ] Fügt dem Sendepuffer Daten hinzu und sendet gegebenenfalls ein Datenpaket.
+\item[RECEIVE: ] Überprüft, ob genug Daten vorhanden sind und gibt diese an die Anwendung zurück.
+\item[CLOSE: ] Initiiert den Abbau der Verbindung, wenn es keine Daten mehr zu  übertragen gibt.
+\item[ABORT: ] Bricht die Verbindung ab. In den meisten Zuständen wird in dem Fall ein Reset Paket gesendet.
+\end{description}
 \subsection{Sequenznummern}
 Ein wichtiges Grundprinzip von TCP das jedes Byte an Daten eine eigene Sequenznummer zugewiesen werden kann, dadurch ist es möglich, das jedes Byte einzeln bestätigt werden kann. Der in TCP dazu verwendete Mechanismus arbeitet kumulativ. Das bedeutet das wenn eine Sequenznummer bestätigt wird, alle Sequenznummern kleiner als die Bestätigungsnummer als angekommen gelten. Dadurch wird es einfach den Verlust einzelner Pakete zu erkenne und diese nochmal zu senden. Das erste Byte eines Datenpaketes entspricht dabei der Sequenznummer des Pakets. 
 
@@ -120,12 +132,11 @@ Wenn beide Seiten einer Verbindung den Established-Zustand erreicht haben, kann 
 
 Ein weiterer Schwerpunkt bei TCP ist das verhindern der Überlastung des Netzwerks, das zwischen Sender und Empfänger liegt, als auch die des Empfängers selber. 
 Die beiden Mechanismen werden "Flow Control" und "Congestion Control" genannt. 
-Flow Control verhindert dabei die Überlastung des Empfängers und Congestion Control die des Übertragungsweges. 
-Für das senden von Daten wird für Flow und Congestion Control jeweils ein Fenster bestimmt. Das Fenster gibt an, wie viele Bytes gesendet werden könne, ohne das diese bestätigt wurden. Wenn die Differenz der Sequenznummern und der letzten erhalten Acknowledgenummer so groß ist wie das Fenster, werden keine neuen Datenpakete mehr versenden, bis weiter Pakete bestätigt wurden. Es wird jeweils das kleinere Fenster als Grenze genommen. \\
+Flow Control verhindert dabei die Überlastung des Empfängers und Congestion Control die des Übertragungsweges. \\\\
+Für das senden von Daten wird für Flow und Congestion Control jeweils ein Fenster bestimmt. Das Fenster gibt an, wie viele Bytes gesendet werden könne, ohne das diese bestätigt wurden. Wenn die Differenz der Sequenznummern und der letzten erhalten Acknowledgenummer so groß ist wie das Fenster, werden keine neuen Datenpakete mehr versenden, bis weiter Pakete bestätigt wurden. Es wird jeweils das kleinere Fenster als Grenze genommen. \\\\
 Das Flow Control vom Empfänger im TCP Header der von ihm versendeten Pakete angeboten. 
-Das Problem bei der Congestion Control ist, das die Kapazität der Verbindung nicht trivial zu bestimmen ist. Für eine Annäherung kommen im normal Fall vier Algorithmen zum Einsatz. Mit Hilfe der Variable "Slow Start Threshold" wird festgelegt, welcher der Algorithmen im aktuellen Zeitpunkt zum Einsatz kommt. So lange unter der Slow Start Threshold liegt, wird der Slow Start Algorithmus verwendet. Eine Überlastung der Verbindung kann festgestellt werden, wenn mehrere Acknowledge Pakete für die selbe Sequenznummer empfangen werden.\\
- Zu beginn einer Übertragung liegen noch keine Informationen über die mögliche Bandbreite des Netzwerks vor, weswegen die Bandbreite langsam sondiert werden muss. Dabei wird Slow Start Algorithmus genutzt, mit durch schnelles ansteigen der Übertragungsrate der Grenzwert erreicht wird. Die Slow Start Phase wird genutzt, bis die Größe des Congestion Windows die Slow Start Threshold übersteigt, oder eine Überlastung der Verbindung festgestellt wird. Da die Grenze der Verbindungskapazität sondiert werden soll wird die Slow Start Threshold zu Beginn auf einen Wert gesetzt, der nicht erreicht werden kann. wenn es zu einen Packet Timeout, wird die Slow Start Threshold auf einen Wert, der einen Bruchteil des erreichten Fensters entspricht gesetzt und der Slow Start Algorithmus, mit einen größeren Initialen Fenster, weiter verwendet. Diesmal wird die Slow Start Phase durch das Überschreiten der Slow Start Threshhold beendet. Für den Rest der Übertragung wechseln sich die beiden Algorithmen ab, bis die Verbindung beendet ist.
-
+Das Problem bei der Congestion Control ist, das die Kapazität der Verbindung nicht trivial zu bestimmen ist. Für eine Annäherung kommen im normal Fall vier Algorithmen zum Einsatz. Mit Hilfe der Variable "Slow Start Threshold" wird festgelegt, welcher der Algorithmen im aktuellen Zeitpunkt zum Einsatz kommt. So lange unter der Slow Start Threshold liegt, wird der Slow Start Algorithmus verwendet. Eine Überlastung der Verbindung kann festgestellt werden, wenn mehrere Acknowledge Pakete für die selbe Sequenznummer empfangen werden.\\\\
+Zu beginn einer Übertragung liegen noch keine Informationen über die mögliche Bandbreite des Netzwerks vor, weswegen die Bandbreite langsam sondiert werden muss. Dabei wird Slow Start Algorithmus genutzt, mit durch schnelles ansteigen der Übertragungsrate der Grenzwert erreicht wird. Die Slow Start Phase wird genutzt, bis die Größe des Congestion Windows die Slow Start Threshold übersteigt, oder eine Überlastung der Verbindung festgestellt wird. Da die Grenze der Verbindungskapazität sondiert werden soll wird die Slow Start Threshold zu Beginn auf einen Wert gesetzt, der nicht erreicht werden kann. wenn es zu einen Packet Timeout, wird die Slow Start Threshold auf einen Wert, der einen Bruchteil des erreichten Fensters entspricht gesetzt und der Slow Start Algorithmus, mit einen größeren Initialen Fenster, weiter verwendet. Diesmal wird die Slow Start Phase durch das Überschreiten der Slow Start Threshhold beendet. Für den Rest der Übertragung wechseln sich die beiden Algorithmen ab, bis die Verbindung beendet ist.\\\\
 Es gibt eine Reihe von Varianten für die Congestion Control Implementierung. Alle davon verwenden eine Variation der folgenden Algorithmen. Hier wird als Beispiel die Reno Variante genannt.
 
 \begin{description}
@@ -149,21 +160,25 @@ Neben der IP-Adresse können auch andere Parameter abgefragt werden. Zum Beispie
 
 \subsection{Paket Format DHCP (Bootstrap)}
 %Bild einfügen
-Op: Gibt den generellen Typ der Nachricht an. Ein Wert von 1 signalisiert eine Anfrage, wobei eine 2 eine Antwort signalisiert. \\\\
-HType: Spezifiziert die Art der dem Netzwerk zugrunde liegende Hardware. Der Code 1 steht dabei für Ethernet. \\\\
-HLen: Bezeichnet die Länge der physischen Adressen im Netzwerk. Im Falle von Ethernet Netzwerken sind dies 6 Byte. \\\\
-Hops: Wird beim Absenden auf 0 gesetzt und von jedem Relay Agent" um eins erhöht. \\\\
-XID: Eine Identifikationsnummer mit der Server Antworten den Anfragen zugeordnet werden können. \\\\
-Secs: Dieses Feld ist für das Bootstrap Protokoll ungenau definiert und wird oft nicht verwendet. Für DHCP wird es für die Zeit in Sekunden genutzt die vergangen ist, seit der Client damit begonnen hat nach einen neuen "Lease" zu fragen. \\\\
-Flags: 8 Bits de für als Flags genutzt werden können. Das erste Bit wird gesetzt, falls die Nachricht als Broadcast gesendet wird, was den DHCP Server signalisiert, das dieser über keine gültige IP Adresse verfügt. \\\\
-CIAddr: Steht für "Client IP Adresse" Der Client schreibt seine eigene IP-Adresse in dieses Feld. Im falle von DHCP kann dieses nur in den Zuständen BOUND, RENEWING oder REBINDING genutzt werden. In allen anderen Fällen bleibt dieses Feld auf Null. \\\\
-YIAddr: Abkürzung für "Your IP Address". Wird vom Server gesetzt um den Client eine Ip Adresse zuzuweisen. \\\\
-SIAddr: Der Server gibt hier die Adresse des Servers an, dem der Client seine nächste Anfrage schicken soll. \\\\
-GIAddr: Wird nur im Bootstrap Protokoll für die Kommunikation zwischen Client und Server verwendet, wenn diese nicht im selben Netzwerk oder Subnetz liegen. Wird im DHCP nicht dafür verwendet das Standardgateway anzugeben. \\\\
-CHAddr: Hardware Adresse des Clients. Bei Nutzung von Ethernet die Mac-Adresse. \\\\
-SName: Der DHCP Server kann hier optional seinen Namen angeben. Alternativ kann dieses Feld durch die "option overload" Funktion auch für Optionen genutzt werden.\\\\
-File: Kann genutzt werden um bei einen DHCPDISCOVER oder OFFER eine Bootdatei anzugeben. \\\\
-Options: Für das Bootstrap Protokoll gibt es eine große Menge an Optionen, einige davon werden exklusiv für DHCP genutzt. \\\\
+
+\begin{description}
+
+\item[Op: ] Gibt den generellen Typ der Nachricht an. Ein Wert von 1 signalisiert eine Anfrage, wobei eine 2 eine Antwort signalisiert.
+
+\item[HType: ] Spezifiziert die Art der dem Netzwerk zugrunde liegende Hardware. Der Code 1 steht dabei für Ethernet. 
+\item[HLen: ] Bezeichnet die Länge der physischen Adressen im Netzwerk. Im Falle von Ethernet Netzwerken sind dies 6 Byte. 
+\item[Hops: ] Wird beim Absenden auf 0 gesetzt und von jedem Relay Agent" um eins erhöht. 
+\item[XID: ] Eine Identifikationsnummer mit der Server Antworten den Anfragen zugeordnet werden können.
+\item[Secs: ] Dieses Feld ist für das Bootstrap Protokoll ungenau definiert und wird oft nicht verwendet. Für DHCP wird es für die Zeit in Sekunden genutzt die vergangen ist, seit der Client damit begonnen hat nach einen neuen "Lease" zu fragen. 
+\item[Flags: ] 8 Bits de für als Flags genutzt werden können. Das erste Bit wird gesetzt, falls die Nachricht als Broadcast gesendet wird, was den DHCP Server signalisiert, das dieser über keine gültige IP Adresse verfügt.
+\item[CIAddr: ] Steht für "Client IP Adresse" Der Client schreibt seine eigene IP-Adresse in dieses Feld. Im falle von DHCP kann dieses nur in den Zuständen BOUND, RENEWING oder REBINDING genutzt werden. In allen anderen Fällen bleibt dieses Feld auf Null.
+\item[YIAddr: ] Abkürzung für "Your IP Address". Wird vom Server gesetzt um den Client eine Ip Adresse zuzuweisen. 
+\item[SIAddr: ] Der Server gibt hier die Adresse des Servers an, dem der Client seine nächste Anfrage schicken soll. 
+\item[GIAddr: ] Wird nur im Bootstrap Protokoll für die Kommunikation zwischen Client und Server verwendet, wenn diese nicht im selben Netzwerk oder Subnetz liegen. Wird im DHCP nicht dafür verwendet das Standardgateway anzugeben. 
+\item[CHAddr: ] Hardware Adresse des Clients. Bei Nutzung von Ethernet die Mac-Adresse. 
+\item[SName: ] Der DHCP Server kann hier optional seinen Namen angeben. Alternativ kann dieses Feld durch die "option overload" Funktion auch für Optionen genutzt werden.
+\item[File: ] Kann genutzt werden um bei einen DHCPDISCOVER oder OFFER eine Bootdatei anzugeben. 
+\item[Options: ] Für das Bootstrap Protokoll gibt es eine große Menge an Optionen, einige davon werden exklusiv für DHCP genutzt. \\
 Die Anzahl und Art der verwendeten Optionen ist variabel. Der Aufbau von diesen folgt jedoch einen definierten Format. Die ersten 8 Bit eines Optionsblock enthalten den Code der Option, weitere 8 Bit geben die Länge des folgenden Datenfeldes an. Das Optionfeld beginnt im Falle von DHCP mit der "Magic Number" 99.130.83.99 nur dann können die exklusiven DHCP Optionen genutzt werden.
 Dazu gehören:
 \begin{description}
@@ -201,11 +216,9 @@ Dazu gehören:
 	
 	
 	\item[Parameter Request List] Es kann eine Liste von Parametern übergeben werden um die Werte von diesen bei einen Server anzufragen. Dazu kann eine beliebig Lange Folge aus DHCP/Bootstrap Optionscodes genutzt werden\\
-	Code 54; Länge n;
-	
-	
+	Code 54; Länge n;	
 \end{description}
-
+\end{description}
 \subsection{Ablauf}
 
 Zu Beginn eines DHCP-Vorgangs, wenn zum Beispiel ein Client hochgefahren wird, verfügt dieser weder über eine IP-Adresse, noch über andere Information die Netzerktopologie betreffend. Als erstes sendet der Client ein Discover Paket. Dafür wird der Operationscode auf 1 gesetzt um eine request Paket zu signalisieren, die MAC-Adresse wird für die Physische Client Adresse verwendet, das Broadcast-Flag wird gesetzt und der DHCP-Message-Type wird auf Discover gesetzt. Aus diesen DHCP-Paket wird ein UDP-Paket erzeugt, mit den Quellport  68 und dem Zielport 67. Die Nachricht wird als Broadcast gesendet. \\
@@ -223,4 +236,5 @@ Während dieses Vorgangs können neben der IP auch noch andere Informationen abg
 
 
 
-\section{AMIDAR}
+\section{AMIDAR Prozessor}
+Bei der Klasse der AMIDAR Prozessoren handelt es sich um rekonfigurierbare Systeme, die zur Laufzeit an die Anwendung angepasst werden kann. Sie bestehen jeweils aus mehreren FUs, die über ein Token- und ein Datennetzwerk verbunden sind. Ein Token stell dabei eine Mikroinstruktion da. Diese werden durch die Tokenmaschiene aus den Prozessor Instruktionen generiert. Dazu kommen FUs für Framestack, Heap, ALUs und Hardwarebeschleuniger. Bei den in Hardware implementierten Prototypen des Fachgebiets Rechnersysteme wird Java-Bytecode eingesetzt.

@@ -1,9 +1,7 @@
 \chapter{Einleitung}
 
-\section{Motivation}
-
-Diese Arbeit basiert auf den im Fachgebiet Rechnersystem entwickelten AMIDAR Prozessor und der dafür angepassten Java API. Zum Zeitpunkt der Arbeit verfügt AMIDAR mit der dazugehörigen API über grundlegende Netzwerk Funktionalitäten. Dazu gehören die Unterstützung für die Protokolle Ethernet, ARP, begrenzt IPv4 und UDP. Mit UDP kann keine korrekte und verlustfreie Datenübertragung garantiert werden, welche für viele Netzwerkanwendungen vorausgesetzt wird. Im Rahmen dieses Projektes wird TCP Stack entwickelt, sowie der IP Stack erweitert um eine geordnete und verlustfreie Datenübertragung zu realisieren. 
-
-
-\section{Ziel der Arbeit}
-
+AMIDAR, steht für Adaptive Microinstruction Driven Architecture, dabei handelt es sich um ein Modell eines adaptiven Prozessors, das es diesem erlaubt zur Laufzeit einer Anwendung auf deren spezifische Anforderungen zu reagieren. Dazu gehört das Anpassen von Busstrukturen und bestehenden Funktionseinheiten. Dazu kommt die Synthese von neuen Funktionseinheiten.
+Im Fachgebiet Rechnersysteme der TU-Darmstadt wird momentan ein Prototyp in Form eines Java-Prozessors implementiert. \\\\
+Dieser wird zur Zeit erweitert, mit dem Ziel die Performance deutlich zu erhöhen. Um diese zu evaluieren fehlen Beispielanwendungen. Eine wichtige Anwendung im Umfeld von eingebettet Systemen ist der TCP/IP Stack.\\\\
+Zum Zeitpunkt der Arbeit verfügt AMIDAR mit der dazugehörigen API bereits über grundlegende Netzwerk Funktionalitäten. Dazu gehören die Unterstützung für die Protokolle Ethernet, ARP, begrenzt IPv4 und UDP. Mit UDP kann keine verlustfreie Datenübertragung garantiert werden, welche für viele Netzwerkanwendungen vorausgesetzt wird.\\\\
+Im Rahmen dieser Arbeit wurde ein TCP Stack entwickelt, sowie der IP Stack erweitert um eine geordnete und verlustfreie Datenübertragung zu realisieren. Die Funktionalität von diesem wurde mit einen auf einen FPGA synthetisierten AMIDAR System getestet.

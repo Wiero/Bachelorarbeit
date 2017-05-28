@@ -1,6 +1,30 @@
 \chapter{Evaluation}
+
+
 \section{Testaufbau}
 
-\section{Funktionen}
+Zur Evaluation wurde ein Nexys Video FPGA Entwickler Board verwendet. Auf diesen wurde ein mit 100MHz laufender Java Prozessor der AMIDAR Klasse synthetisiert. Als Netzwerkschnittstelle wurde eine Steckkarte mit 2 Gigabit Ethernet RJ45 Schnittstellen verwendet. Diese wurde mit einen Patch Kabel zu der Ethernet Schnittstelle eines Laptops verbunden. Dieser verfügt über eine Realtec Gigabit Ethernet Schnittstelle. Des weiteren läuft auf dem Laptop Ubuntu 16.04 und eine "{}ISC-DHCPD"{} DHCP-Server. Für Testzwecke wurden außerdem diverse Java Programme genutzt, welche die Java Netzwerksockel nutzen. 
+
+\section{Grundlegende Funktionen}
+
+Für das Testen der Grundfunktionen wurden mehrere Testszenarien verwendet. Zum einen wurde ein einfacher echo Server auf den AMIDAR laufen gelassen, der Ankommende Wörter zurück sendet. Dieser wurde auf einen oder mehreren Threads aufgeführt. Eine auf dem Laptop laufende Java Anwendung sendet dabei eingegebene Textnachrichten und wartet auf die Antwort des Servers, die in der Konsole ausgegeben wird. Dabei wird sowohl der Verbindungsaufbau als auch das Empfangen und Senden von Nachrichten getestet. Dies funktioniert auch mit mehreren offenen Verbindungen parallel. 
+
+
 
 \section{Performanz}
+Für die Performance Messung wird eine Mischung von Daten verwendet, die entweder aus Wireshark ausgelesen wurden, in den Testanwendungen auf dem Laptop in eine .csv Datei geloggt wurden, oder während den Betrieb auf AMIDAR ermittelt und über UART ausgegeben. 
+Die Latenz der einzelnen Pakete wurde Wireshark entnommen. Da Wireshark auf dem Laptop lief ist die Übertragungszeit des letzten Pakets, das vom Laptop in einen Handshake gesendet hat nicht gemessen. 
+Ein 3 Wege Handshake, der von dem Laptop initiiert wurde betrug die RTT nach dem senden des SYN-Paktes bis zum Eintreffen des SYN-ACK-Pakets 15-30 Millisekunden. Momentan gibt es eine recht große Schwankung der Reaktionszeit. Diese Zeit wird durch den neuen Scheduler Vermutlich reduziert werden.\\
+In dem Fall das die Übertragung von AMIDAR initiert wird, benötigt der Laptop 900 Millisekunden, um auf die Anfrage zu reagieren. Nach weiter 40 Millisekunden trifft das ACK-Paket von AMIDAR ein.\\
+
+In einen weiteren Test wurde zehn Verbindungen zum selben Zeitpunkt geöffnet über die jeweils in kurzen Abständen 500 Byte an Daten übertragen wurden. Diese Daten wurden von AMIDAR als Echo zurück gesendet. Die Latenz dieser Übertragung wurde in einer Logdatei gespeichert und Betrug zwischen 1,4 und 3,5 Sekunden. Dabei entfiel der größte Teil der Zeit auf das Auslesen der Daten aus den ankommenden Datenpaketen.\\
+Ein Problem, das bei diesen Versuch sichtbar wurde ist die Schwankende Latenz. Die Dauer eines Timeouts wird bei TCP relativ zur RTT bestimmt. Nach dem schnellen SYN-ACK mit kleinen Paketen wird im PC ein entsprechend kurzes Zeitlimit für Timeouts gesetzt. Das hat zur Folge, dass wenn auf der Seite des AMIDAR Prozessors größere Datenpakete verarbeitet werden müssen, es zu Neuübertragungen von diesen kommt obwohl diese nicht verloren gegangen sind.\\
+
+Die Übertragungsrate beim senden wurde ermittelt in dem ein Zufalls generiertes Datenpaket in einer Schleife gesendet wurde. Dabei wird eine Übertragungsrate von 160 kBit/s erreicht. Die Größe der einzelnen Datenpakete hat dabei nur einen vernachlässigbaren Einfluss auf die Nettoübertragungsrate, was darauf schließen lässt, dass das Bottleneck bei dem Sendepuffer liegt. 
+
+
+
+
+ 
+
+ 

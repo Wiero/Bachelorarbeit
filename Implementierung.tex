@@ -1,10 +1,10 @@
-\chapter{Implementierung}
-Im Rahmen dieser Arbeit wurde ein TCP Stack für die API des AMIDAR Microprozessor entwickelt. Darüber hinaus wurde 
+\chapter{Implementierung des TCP/IP Stacks}
+Im Rahmen dieser Arbeit wurde ein TCP Stack für die API des AMIDAR Microprozessor entwickelt. Darüber hinaus wurde der schon vorhandene IP-Stack an angepasst um die gestellten Anforderungen erfüllen zu können. Zusätzlich wurde auch die Unterstützung für DHCP hinzugefügt.
 
 \section{Überblick}
-Vor Beginn dieses Projekts verfügte die AMIDAR Java API über Grundlegende Netzwerk Funktionen. Dazu gehört der Netzwerktreiber, ein IP-Stack mit ARP Funktionalität und ein UDP Stack. Neu geschrieben wurde im Rahmen dieses Projekts der Multithreading Fähige TCP Stack. Dieser wurde in die vorhandene Software Integriert. Desweiteren wurde der IP-Stack erweitert und optimiert. \\
+Vor Beginn dieses Projekts verfügte die AMIDAR Java API über Grundlegende Netzwerk Funktionen. Dazu gehört der Netzwerktreiber, ein IP-Stack mit ARP Funktionalität und ein UDP Stack. Neu geschrieben wurde im Rahmen dieses Projekts der Multithreading Fähige TCP Stack. Dieser wurde in die vorhandene Software Integriert. Desweiteren wurde der IP-Stack erweitert und optimiert.\\\\
 Sowohl beim Senden als auch beim Empfangen von Datenpaketen greifen die einzelnen Module in einander über. Zum empfangen von Daten Prüft der Prozess des Netzwerktreibers ob neue Ethernet Frames vorliegen. Wenn das der Fall wird, eine Funktion im IP Stack aufgerufen, die die Ethernet Frames überprüft. Der IP-Stack unterscheidet die Pakete zwischen ARP und IP. ARP anfrage werden geprüft und gegebenenfalls beantwortet. Handelt es sich bei den Datagramm um ein IP-Paket, wird ein entsprechendes Objekt erzeugt und nach weiterer Überprüfung entweder an den UDP-Stack oder an den TCP-Stack übergeben. Die Stacks für TCP und UDP beinhalten jeweils einen Table mit den vorhandenen Verbindungen, die durch Ziel und Quell Port identifiziert werden können. Ihnen können gegebenenfalls die Erzeugten Pakete weiter gegeben werden, wo sie zwischengespeichert werden. Im Falle von UDP wird von den dieses die Payload ausgelesen, wenn auf "receive"{} Methode der UDP-Connection, von einen anderen Thread aufgerufen wird. Die TCP-Connections können jeweils in ihren eigenen Thread laufen, da eine Zeitnahe Verarbeitung der angekommen Pakete nötig ist um die Verbindung zu managen. In diesem Thread werden die angekommenen Pakete ausgewertet und die dazu entsprechenden Reaktionen berechnet und ausgeführt. \\
-Wenn UDP Datenpakete versendet werden sollen, wird die {}"Send"{} Methode aufgerufen, die ein UDP-Paket erzeugt und diesen an den UDP-Stack weitergibt. Der wiederum ruft den erzeugt aus dem UDP-Paket ein IP-Paket. Mit dem die {}"Send"{} Methode des IP-Stacks aufgerufen wird. Die letztendlich einen Ethernetframe erzeugt und mit den EthernetWrapper den Sendevorgang startet.\\ 
+Wenn UDP Datenpakete versendet werden sollen, wird die {}"Send"{} Methode aufgerufen, die ein UDP-Paket erzeugt und diesen an den UDP-Stack weitergibt. Der wiederum ruft den erzeugt aus dem UDP-Paket ein IP-Paket. Mit dem die {}"Send"{} Methode des IP-Stacks aufgerufen wird. Die letztendlich einen Ethernetframe erzeugt und mit den EthernetWrapper den Sendevorgang startet.\\ \\
 Bei dem senden von Daten über TCP wird von der Anwendung der ebenfalls die {}"Send"{} Methode der TCP-Connection aufgerufen. Die werden dabei jedoch nicht sofort gesendet, sondern in einen Puffer zwischengespeichert, vorausgesetzt der aktuelle Status der Verbindung erlaubt das. Bei Ausführung des Threads der Verbindung, werden gegebenenfalls die zu übertragenden TCP-Pakete in IP Pakete umgewandelt und analog wie die UDP-Pakete versendet. 
 
 
@@ -17,16 +17,16 @@ Für die Repräsentation von IP-Paket wird die Klasse "IpPacket" genutzt. Diese 
 
 \subsection{Empfangen von IP Paketen}
 
-Die Methode readIpPakets() des IP-Stacks, die vom Netzwerktreiber Thread aufgerufen. In dieser werden in einer Schleife die angekommenen Ethernet Pakete eingelesen und die IP Pakete dazu erzeugt. Dabei werden im Zweifelsfall Fragmente von fragmentierten Paketen zwischengespeichert, bis diese vollständig sind. \\
-Bei den so erzeugten IP-Paketen wird das darüber liegende Protokoll ausgelesen.\\
+Die Methode readIpPakets() des IP-Stacks, die vom Netzwerktreiber Thread aufgerufen. In dieser werden in einer Schleife die angekommenen Ethernet Pakete eingelesen und die IP Pakete dazu erzeugt. Dabei werden im Zweifelsfall Fragmente von fragmentierten Paketen zwischengespeichert, bis diese vollständig sind. \\\\
+Bei den so erzeugten IP-Paketen wird das darüber liegende Protokoll ausgelesen.\\\\
 Damit UDP und TCP Pakete zugestellt werden können müssen die jeweiligen Stacks im IP-Stack registriert werden. Nach der Registrierung können angekommene  Pakete den jeweiligen Stack zugeordnet werden. Dafür implementieren beide Stacks die Function "notificateByIpStack()" der eine Liste mit angekommenen UDP-Paketen übergeben wird. 
 
 \subsubsection{Fragmentierung}
 
-IP Pakete können während der Übertragung fragmentiert werden. Um über Netzwerke mit einer zu niedrigen Maximalen Segment Größe übertragen zu werden. Diese werden vom Empfänger defragmentiert. \\
+IP Pakete können während der Übertragung fragmentiert werden. Um über Netzwerke mit einer zu niedrigen Maximalen Segment Größe übertragen zu werden. Diese werden vom Empfänger defragmentiert. \\\\
 Fragmentierte Pakete können nach der dem erzeugen erkannt werden, in dem das entsprechende Flag ausgelesen wird. Die Flag gibt nicht explizit an, das diesen Paket Teil eines größeren fragmentierten Pakets ist, sondern dass sie ein Teil eines fragmentierten Pakets sind und weitere Pakete Fragmente folgen. Das bedeutet, dass das letzte Fragment eines Pakets nicht das Flag gesetzt hat, dieses kann man daran erkennen, dass der Fragment Offset ungleich Null ist\\
 Der IP Stack enthält eine Liste von für Fragmentierte Pakete, die Listen mit jeweils zusammengehörigen Fragmenten enthält. Wannn immer ein Paket ankommt, bei dem die {}"More Fragments"{} Flag gesetzt ist oder die Data Offset ungleich Null ist, wird geprüft, ob dieses zu einem der fragmentierten Pakete gehört, und wird in diesem Fall an eine der Listen hinzugefügt. Die Zugehörigkeit wird dabei anhand der Identification des IP Pakets geprüft. \\
-Falls ein Paket ohne Flag einen anderen Fragmentierten Paket zugeordnet werden kann, ist dieses das letzte Fragment des ursprünglichen IP Pakets, mit dem das kombinierte Paket erzeugt werden kann. \\
+Falls ein Paket ohne Flag einen anderen Fragmentierten Paket zugeordnet werden kann, ist dieses das letzte Fragment des ursprünglichen IP Pakets, mit dem das kombinierte Paket erzeugt werden kann. \\\\
 Für diesen Zweck verfügt die Klasse IpPaket über die statische Methode "{}fuseFragmentedIpPackets()"{}, die eine Liste von zusammengehörigen IP-Paket Fragmenten annimmt. Diese werden auf Kompatibilität geprüft, wobei auch die Größe der kombinierten Nutzlast berechnet wird. Die Fragmente müssen neben der identischen Identifikation über die selbe Quell und Ziel IP-Adresse verfügen. Des weiteren müssen die Angaben des Frame Offsets mit der Paketlänge Plausibel sein. \\
 Anschließend werden die Pakete wird ein Array der entsprechenden Länge erzeugt und die Nutzlast der Pakete anhand des Frame Offsets zusammengesetzt. Danach kann der Konstruktor der IP-Paket Klasse aufgerufen werden, wobei ihm die neu kombinierte Nutzlast übergeben wird.  Das neu erzeugte Paket wird zurückgegeben und von dem IP-Stack weiter verarbeitet. 
 
@@ -36,9 +36,9 @@ Der IP-Stack verfügt über die Methode "sendIpPaket", die im Normalfall von dem
 
 
 \subsection{Address Resolution Protokoll (ARP)}
-Das ARP Protokoll wird verwendet um in einen lokalen Netzwerk die IP Adressen zu den physischen MAC-Adressen aufzulösen. Ein Host, kann einer ARP-Request als Broadcast verschicken um die MAC-Adresse zu erfahren, über die der die Netzwerkressource mit der IP-Adresse zu erreichen ist. \\
+Das ARP Protokoll wird verwendet um in einen lokalen Netzwerk die IP Adressen zu den physischen MAC-Adressen aufzulösen. Ein Host, kann einer ARP-Request als Broadcast verschicken um die MAC-Adresse zu erfahren, über die der die Netzwerkressource mit der IP-Adresse zu erreichen ist. \\\\
 
-Der IP-Stack verfügt über die Möglichkeit ankommende ARP Pakte zu verarbeiten. Für den Fall, das es sich bei einen ankommenden Datenpaket anstatt eines IP-Pakets um ein ARP-Paket handelt, wird geprüft, ob es sich um eine {}"Request"{} oder eine {}"Response"{} handelt. Für den Fall, das es sich um eine Request handelt, wird in einer entsprechenden Antwort die eigene physische MAC Adresse verschickt. \\
+Der IP-Stack verfügt über die Möglichkeit ankommende ARP Pakte zu verarbeiten. Für den Fall, das es sich bei einen ankommenden Datenpaket anstatt eines IP-Pakets um ein ARP-Paket handelt, wird geprüft, ob es sich um eine {}"Request"{} oder eine {}"Response"{} handelt. Für den Fall, das es sich um eine Request handelt, wird in einer entsprechenden Antwort die eigene physische MAC Adresse verschickt. \\\\
 
 Beim versenden eines IP-Pakets muss ein Ethernet-Paket erzeugt werden. Dafür wird die MAC-Adresse unter der das Ziel oder die nächste Station auf dem Weg zu diesen erreichbar ist benötigt. Für diesen Zweck verfügt der IP-Stack über eine Hash-Map, die als ARP-Cache dient. In dem Fall, das für die IP kein Eintrag mit MAC-Adresse vorliegt, wird eine ARP-Request gesendet und auf deren Antwort gewartet. Nachdem die ARP-Response eingetroffen ist wird die IP-Adresse mit der MAC-Adresse verknüpft und in den dem ARP-Cache gespeichert. 
 
@@ -48,6 +48,10 @@ Beim versenden eines IP-Pakets muss ein Ethernet-Paket erzeugt werden. Dafür wi
 
 
 \section{TCP}
+
+Vor der Implementierung des TCP Stacks wurde überprüft, ob es schon in Java implementierte TCP-Stacks gibt. Die einzige in Frage kommende Implementierung war der ejlP TCP-Stack. Dieser verfügt jedoch über keinen Mechanismus für die erneute Übertragung verlorener Pakete, die von den darüber liegenden Protokoll gewährleistet werden müsste. Auß diesen Grund wurde entschieden eine eigene TCP-Variante geschrieben, die keine Umfassende Änderung des IP-Stacks und des Treibers erfordert. 
+
+
 
 \subsection{TCP Stack}
 Der TCP Stack stellt den Datenaustausch zwischen der einzelnen TCP-Verbindungen und dem IP-Stack her und ist dabei in der Lage mehrere Verbindung parallel offen zu haben und diese einzeln zu verwalten. 
@@ -76,7 +80,7 @@ Jede dieser Methoden gibt als Integer den nächsten Zustands zurück. {}"Active 
 {}"RexmtTimeout"{} wird aufgerufen, wenn der retransmit Timer für ein Paket ausläuft. Um zu starke Schwankungen bei der RTO zu vermeiden wird eine geglättete Round trip
 
 \subsubsection{Neue Übertragung verlorener Pakete}
-Jedes gesendete Paket wird mit einen Zeitstempel versehen und der Retransmitqueue hinzugefügt. Der Zeitstempel des ersten Elementes von dieser, dem ältesten Paket in dieser, wird als Basis genommen um zu bestimmen, ob ein Timeout vorliegt. Die vergangene Zeit, bis ein Retransmit ausgelöst wird, wird nicht willkürlich gewählt, da es so bei Verbindung mit hoher Latenz Pakete neu versendet würden, die nicht verloren gegangen sind. Diese Zeit, RTO genannt, wird abhängig von der Round Trip Time (RTT) berechnet. Die Round Trip Time gibt die Zeit an die vergeht, nach dem ein Paket übergeben wurde, bis das Acknowledgement für dieses Paket eingetroffen ist.  Um zu starke Schwankungen bei der RTO zu vermeiden wird eine geglättete Round Trip Time verwendet. \\
+Jedes gesendete Paket wird mit einen Zeitstempel versehen und der Retransmitqueue hinzugefügt. Der Zeitstempel des ersten Elementes von dieser, dem ältesten Paket in dieser, wird als Basis genommen um zu bestimmen, ob ein Timeout vorliegt. Die vergangene Zeit, bis ein Retransmit ausgelöst wird, wird nicht willkürlich gewählt, da es so bei Verbindung mit hoher Latenz Pakete neu versendet würden, die nicht verloren gegangen sind. Diese Zeit, RTO genannt, wird abhängig von der Round Trip Time (RTT) berechnet. Die Round Trip Time gibt die Zeit an die vergeht, nach dem ein Paket übergeben wurde, bis das Acknowledgement für dieses Paket eingetroffen ist.  Um zu starke Schwankungen bei der RTO zu vermeiden wird eine geglättete Round Trip Time verwendet. \\\\
 $SRTT = (\alpha * SRTT) + ((1-\alpha)*RTT)$\\
 $RTO = min [u, max [o, (\beta *SRTT)]]$\\\\
 Der Glättungsfaktor $\alpha$ wird zwischen 0,8 und 0,9 festgelegt. $\beta$ ist ein Varianzfaktor und wird auf einen Wert zwischen 1,3 und 2,0 gesetzt. {}"u"{} und {}"o"{} stellen die obere und untere Grenze da und werden Beispielsweise auf eine Sekunde bzw. eine Minute gesetzt.
@@ -108,8 +112,7 @@ Bei eintreffenden Paketen wird geprüft, ob es sich um ein SYN-Paket handelt. In
 \item[SYN-RECEIVED]
 In diesen Zustand werden Aufrufe der {}"send"{} und {}"receive"{} calls zwischengespeichert um in einen späteren Zustand ausgewertet zu werden. 
 Bei Ausführung eines {}"close"{} Calls wird geprüft, ob der Sendepuffer leer ist, wenn das nicht der Fall ist verbleibt die Verbindung im aktuellen Zustand, andernfalls wird ein FIN-Paket gesendet um das Ende der Verbindung einzuleiten. 
-Wird die "{}Abort"{} Funktion aufgerufen, wird ein RST-Packet gesendet, der TCB gelöscht und in den Zustand CLOSED zurück gegangen.\\ 
-
+Wird die "{}Abort"{} Funktion aufgerufen, wird ein RST-Packet gesendet, der TCB gelöscht und in den Zustand CLOSED zurück gegangen.\\\\
 Ankommende Pakte werden, nach Überprüfung der Gültigkeit anhand der Sequenznummer, ausgewertet. Ist da angekommen Paket ein ACK-Paket, wird das bestätigte Paket aus der RetransmitQueue entfernt und in den Established Zustand gewechselt. \\ Falls ein weiteres SYN- oder ein RST-Paket ankommen wird die Verbindung beendet. 
 
 	
@@ -119,39 +122,42 @@ Nach dem eintreffen, von gültigen SYN-ACK Paket wird in den Zustand ESTABLISHED
 	
 \item[ESTABLISHED]
 
-In diesen Zustand beginnt die {}"send"{} Operation mit dem Speichern der übergebenen Daten in den Sendepuffer. Anschließen wird das maximale Limit an Daten bestimmt, die noch versendet werden dürfen. Dafür wird das Minimum von "Congestion Window", und "receiverWindow"{} genutzt. Anschließend wird ein Datenpaket erzeugt, wobei darauf geachtet, wird das dass Limit, auch die Maximale Segment Größe nicht überschritten wird. \\
-Ankommende Datenpakete werden einsortiert. Entspricht die Sequenznummer des Pakets der erwarteten Sequenznummer, können die Daten des Pakets in den Empfangspuffer geschrieben werden. Ist die Sequenznummer über der erwarteten Nummer, werden die Pakete in den "{}Out of Order"{}  Puffer zwischen gespeichert. Diese werden wenn das fehlende Paket ankommt, hinter diesen in den Empfangspuffer einsortiert. Jedes angekommene Paket wird mit einen ACK-Paket quittiert. Dabei ist zu beachten, das bei Paketen die nicht in der erwartenden Reihenfolge ankommen, die Sequenznummer des erwarteten Pakets als Acknowledge Nummer gesendet wird. Dadurch wird der Gegenseite signalisiert, das dieses Paket möglicherweise verloren gegangen ist. Dadurch enstehen duplizierte ACKs,  die für  "{}Fast Retransmit"{} und "{} Fast Recovery"{} essentiell ist.
-Des weiteren wird das mit dem Paket mitgeschickte ACK überprüft. Entspricht die Acknowledge Nummer den der letzten nicht bestätigten gesendeten Sequenznummer wird ein Zähler um eins hoch gesetzt um duplizierte ACKs zu erkennen. Bei einen mehr als drei Mal duplizierten ACK wird ein {}"Fast Retransmit"{} durchgeführt Dabei wird die Slow Start Threshold halbiert und die Größe des Congestion Windows auf den Wert von diesen gesetzt. Zusätzlich wird das verlorene Paket aus der "{}Retransmit Queue"{} rausgesucht und sofort neu übertragen. Wenn ein gültiges nicht dupliziertes ACK eintrifft werden alle bestätigten Segmente aus der Retransmit Queue entfernt und das Congestion Window entsprechend der Slow Start und Congestion Avoidance Algorithmen erhöht. Falls das FIN-Flag bei einen gültigen Paket gesetzt ist, wird der Zustand Close Wait zurück gegeben.  
+In diesen Zustand beginnt die {}"send"{} Operation mit dem Speichern der übergebenen Daten in den Sendepuffer. Anschließen wird das maximale Limit an Daten bestimmt, die noch versendet werden dürfen. Dafür wird das Minimum von "Congestion Window", und "receiverWindow"{} genutzt. Anschließend wird ein Datenpaket erzeugt, wobei darauf geachtet, wird das dass Limit, auch die Maximale Segment Größe nicht überschritten wird. \\\\
+Ankommende Datenpakete werden einsortiert. Entspricht die Sequenznummer des Pakets der erwarteten Sequenznummer, können die Daten des Pakets in den Empfangspuffer geschrieben werden. Ist die Sequenznummer über der erwarteten Nummer, werden die Pakete in den "{}Out of Order"{}  Puffer zwischen gespeichert. Diese werden wenn das fehlende Paket ankommt, hinter diesen in den Empfangspuffer einsortiert. Jedes angekommene Paket wird mit einen ACK-Paket quittiert. Dabei ist zu beachten, das bei Paketen die nicht in der erwartenden Reihenfolge ankommen, die Sequenznummer des erwarteten Pakets als Acknowledge Nummer gesendet wird. Dadurch wird der Gegenseite signalisiert, das dieses Paket möglicherweise verloren gegangen ist. Dadurch enstehen duplizierte ACKs,  die für  "{}Fast Retransmit"{} und "{} Fast Recovery"{} essentiell ist.\\\\
+Des weiteren wird das mit dem Paket mitgeschickte ACK überprüft. Entspricht die Acknowledge Nummer den der letzten nicht bestätigten gesendeten Sequenznummer wird ein Zähler um eins hoch gesetzt um duplizierte ACKs zu erkennen. Bei einen mehr als drei Mal duplizierten ACK wird ein {}"Fast Retransmit"{} durchgeführt Dabei wird die Slow Start Threshold halbiert und die Größe des Congestion Windows auf den Wert von diesen gesetzt. Zusätzlich wird das verlorene Paket aus der "{}Retransmit Queue"{} rausgesucht und sofort neu übertragen. Wenn ein gültiges nicht dupliziertes ACK eintrifft werden alle bestätigten Segmente aus der Retransmit Queue entfernt und das Congestion Window entsprechend der Slow Start und Congestion Avoidance Algorithmen erhöht. Falls das FIN-Flag bei einen gültigen Paket gesetzt ist, wird der Zustand Close Wait zurück gegeben.  \\\\
 In dem Fall, das es zu dem Timeout eines Pakets kommt, wird die Slow Start Threshold ebenfalls halbiert und das Congestion Window auf den initialen Wert gesetzt. 
-
-\item[CLOSE-WAIT]
-
-
-
-\item[LAST-ACK]
-
-\item[CLOSING]
-
-\item[TIME-WAIT]
 
 \item[FIN-WAIT-1]
 
-\item[FIN-WAIT-2]	
+In diesen Zustand wird auf ankommende Pakete auf die selbe Art reagiert wie im Zustand ESTABLISHED mit dem Unterschied das nach einen ankommende gültigen ACK-Paket in den Zustand FIN-WAIT-2 gewechselt wird. Ist zusätzlicher auch das FIN-Flag gesetzt wird in den Zustand TIME-WAIT übergegangen. Dazu kommt, das bei duplizierten ACK-Paketen kein {}"Fast Retransmit"{} mehr durchgeführt wird.
 
+\item[FIN-WAIT-2]	
+Ankommende Pakete werden hier ebenfalls noch verarbeitet wie in der ESTABLISHED Phase mit dem Unterschied, das bei einen FIN-Paket der Zustand TIME-WAIT zurück gegeben wird.
+
+
+\item[CLOSE-WAIT]
+
+In diesen Zustand funktioniert ein "{}Send"{} Call genauso wie im Zustand ESTABLISHED. Bei ankommenden Segmenten werden nur noch ankommende ACK-Pakete verarbeitet, da die Gegenstelle keine Daten mehr senden wird. Nach der Ankunft von SYN- oder RST-Paketen wird die Verbindung beendet. \\
+Nach einen Aufruf von {}"close"{} Call wechselt die Verbindung in den Zustand LAST-ACK und sendet ein FIN-Paket.
+
+\item[LAST-ACK]
+
+In diesen Zustand lösen alle Usercalls bis auf {}"Segment Arrive"{} eine IOException aus. Ankommende gültige Pakete werden daraufhin untersucht, ob diese das ACK zu dem gesendeten FIN-Paket ist. Ist dies der Fall wird die Verbindung beendet und in den Zustand CLOSED übergegangen. Bei der Ankunft eines RST oder SYN Pakets wird die Verbindung abgebrochen und ebenfalls der Zustand CLOSED zurück gegeben.
+
+\item[CLOSING]
+
+Der Zustand Closing verhält sich weitgehend identisch zum Zustand LAST-ACK, mit dem Unterschied das wenn ein Ankommendes Paket das ACK für das gesendete FIN-Paket enthält in den Zustand TIME-WAIT übergegangen wird.
+
+
+\item[TIME-WAIT]
+In diesen Zustand ist der Verbindungsabbau abgeschlossen. Die Verbindung bleibt dennoch ein paar Minuten offen um stark verzögerte Pakete zu bestätigen. Das eintreffen von RST- und SYN Paketen beendet die Verbindung sofort.
 
 \end{description}
 
-	\begin{itemize}
-		\item[active open]
-		\item[passive open]
-		\item[send]
-		\item[receive]
-		\item[close]
-		\item[abort]
-		\item[segment Arrive]
-		\item[Timeout]
-	\end{itemize}
 \subsubsection{Options}
+TCP Optionen werden in einen Optionalen Bereich mit variabler Länge des Headers abgelegt. Um diese zu Repräsentieren wurde eine Klasse erstellt um den Optionsbereich des TCP-Headers abzubilden. Dafür wurde eine Methode geschrieben um die Optioncodes in eine übersichtlich Datenstruktur zu parsen. Zusätzlich git es eine Methode um Optionen in eine Datenstruktur zu überführen und daraus den Optionsblock im TCP Header zu generieren. Es wurden jedoch keine Unterstützung für konkrete Optionen implementiert.
+
+
 
 \section{Zero Copy}
 Die TCP und IP Pakete werden jeweils durch eine entsprechende Klasse repräsentiert. Die Objekte dieser Klasse enthalten jeweils ein Array, dass Header und Nutzdaten des Pakets enthält. Beide Klassen verfügen über einen Konstruktor, der jeweils die andere der beiden Klassen als Parameter entgegen nimmt. So kann beim Senden aus einen TCP-Paket ein IP-Paket erzeugt werden und beim Empfangen aus einen IP-Paket ein TCP-Paket erzeugt werden. Dabei stellt das TCP-Paket die Nutzlast des IP-Pakets da. Um in diesen Fall lange Kopiervorgänge zu ersparen wird es vermieden ein neues Array anzulegen und die Daten rein zu kopieren. Anstelle dessen wird in der TCP-Paket Klasse im Array ein 20 Byte Puffer eingeplant, in dem der IP-Header später geschrieben werden kann. Bei der Erzeugung eines IP-Pakets aus einen TCP-Paket wird das im TCP-Paket erzeugte Array weiterverwenden und da die ersten 20 Byte leer sind, kann dort der IP Header geschrieben werden.
@@ -165,9 +171,20 @@ Die Klasse "DHCPPacket" repräsentiet DHCP Pakete. Diese enthält ein Integer Ar
 
 \subsection{DHCP-Controller}
 
-Der DHCP-Controller enthält, den Thread, welcher den DHCP-Client steuert. Für die Ablaufsteuerung wurde ebenfalls ein kleiner Zustandsautomat implementiert. Sobald der Thread gestartet wurde, wird eine Discover Nachricht als Broadcast gesendet und in den Zustand "SELECTING" gewechselt. In diesen Zustand wird auf eine "OFFER" Nachricht des Servers gewartet. Die DHCP Nachrichten werden identifiziert in dem der Optionscode 53 aus dem Optionsblock ausgelesen wird. Der Datenwert dieser Option gibt die Art des DHCP-Paketes an. Sobald ein DHCP- {}"OFFER"{} eintrifft, wird die Vorgeschlagene IP mit einer "REQUEST" angefragt und in den Zustand REQUESTING gewechselt. Bei dieser Anfrage wird die IP-Adresse mit den Optionscode 50 angefragt. Anschließend wird auf die "ACK" Nachricht gewartet, in dieser die IP-Adresse bestätigt wird. Anschließen muss noch mit einer ARP Request geprüft werden, ob diese Adresse schon von einen andern Host im Netzwerk verwendet wird. 
+Der DHCP-Controller enthält, den Thread, welcher den DHCP-Client steuert. Für die Ablaufsteuerung wurde ebenfalls ein kleiner Zustandsautomat implementiert. Sobald der Thread gestartet wurde, wird eine Discover Nachricht als Broadcast gesendet und in den Zustand "SELECTING" gewechselt. In diesen Zustand wird auf eine {}"OFFER"{} Nachricht des Servers gewartet. Die DHCP Nachrichten werden identifiziert in dem der Optionscode 53 aus dem Optionsblock ausgelesen wird. Der Datenwert dieser Option gibt die Art des DHCP-Paketes an. Sobald ein DHCP- {}"OFFER"{} eintrifft, wird die Vorgeschlagene IP mit einer "REQUEST" angefragt und in den Zustand REQUESTING gewechselt. Bei dieser Anfrage wird die IP-Adresse mit den Optionscode 50 angefragt. Anschließend wird auf die "ACK" Nachricht gewartet, in dieser die IP-Adresse bestätigt wird. Anschließen muss noch mit einer ARP Request geprüft werden, ob diese Adresse schon von einen andern Host im Netzwerk verwendet wird. 
 
 \section{Packet Builder}
 
-\section{TCP Software Interface}
+Ein Problem bei der Erzeugung der Paketobjekte war, das bei jedes mal eine Reihe von Parametern gesetzt werden muss, die bis auf wenige Fälle den selben Standardwert haben. Die müssen dennoch bei jeder Paket Erzeugung gesetzt werden, was aufwendig und fehleranfällig ist. Um das zu vermeiden können die Klassen für TCP- und DHCP-Pakete mit einen "{}Builder Pattern"{} erzeugt werden.  Dabei wird eine spezielle Builder Klasse genutzt, die als Attribute die Parameter der Paket-klasse enthält. Diese werden vorinitialisiert. Über spezielle Setter Methoden können die Werte gesetzt werden. Diese geben als Rückgabewert das Builderobjekt zurück. Der letzte Aufruf auf das Objekt ist jeweils die {}"build"{} Funktion, welche den Konstruktor der Paketklasse aufruft und dieses zurück gibt. Ein derartiger Aufruf sieht Beispielsweise aus aus wie folgt. 
+\lstset{language=Java}
+\begin{lstlisting}
+new TcpPaketBuilder(tcb).setSeqNum(NextSendSeqNum).setAckNum(NextRecseqNum).setAck().build()
+\end{lstlisting}
+Das erzeugen eines TCP-Pakets ohne die Verwendung des "{}Builder Patterns"{} sieht folgender maßen aus. 
+
+\begin{lstlisting}
+new TcpPaket(payLoad,length,tcpOptions, connection, seqNum, ackNum, (short)winSize, flags ,urgP);
+\end{lstlisting}
+
+
 
