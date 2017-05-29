@@ -20,7 +20,7 @@ In dem Fall das die Übertragung von AMIDAR initiert wird, benötigt der Laptop 
 In einen weiteren Test wurde zehn Verbindungen zum selben Zeitpunkt geöffnet über die jeweils in kurzen Abständen 500 Byte an Daten übertragen wurden. Diese Daten wurden von AMIDAR als Echo zurück gesendet. Die Latenz dieser Übertragung wurde in einer Logdatei gespeichert und Betrug zwischen 1,4 und 3,5 Sekunden. Dabei entfiel der größte Teil der Zeit auf das Auslesen der Daten aus den ankommenden Datenpaketen.\\
 Ein Problem, das bei diesen Versuch sichtbar wurde ist die Schwankende Latenz. Die Dauer eines Timeouts wird bei TCP relativ zur RTT bestimmt. Nach dem schnellen SYN-ACK mit kleinen Paketen wird im PC ein entsprechend kurzes Zeitlimit für Timeouts gesetzt. Das hat zur Folge, dass wenn auf der Seite des AMIDAR Prozessors größere Datenpakete verarbeitet werden müssen, es zu Neuübertragungen von diesen kommt obwohl diese nicht verloren gegangen sind.\\
 
-Die Übertragungsrate beim senden wurde ermittelt in dem ein Zufalls generiertes Datenpaket in einer Schleife gesendet wurde. Dabei wird eine Übertragungsrate von 160 kBit/s erreicht. Die Größe der einzelnen Datenpakete hat dabei nur einen vernachlässigbaren Einfluss auf die Nettoübertragungsrate, was darauf schließen lässt, dass das Bottleneck bei dem Sendepuffer liegt. 
+Die Übertragungsrate beim senden wurde ermittelt in dem ein Zufalls generiertes Datenpaket in einer Schleife gesendet wurde. Dabei wird eine Übertragungsrate von 1333 kBit/s erreicht. Die Größe der einzelnen Datenpakete hat dabei nur einen vernachlässigbaren Einfluss auf die Nettoübertragungsrate, was darauf schließen lässt, dass das Bottleneck bei dem Sendepuffer liegt. 
 
 
 
