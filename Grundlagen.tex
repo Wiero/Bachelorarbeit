@@ -31,22 +31,6 @@ Dazu kommen 2 Byte, die den Typ des darüber liegenden Protokolls angeben. Zum B
 \section{Internet Protocol Version 4 (IPv4)}
 Das IP Protokoll ist das für die Datenübertragung wichtigste Protokoll auf der Vermittlungsschicht. Es wurde entwickelt um eine Paket vermittelte Kommunikation über mehrere Computernetzwerke hinweg zu ermöglichen. Quellen und Ziele der Übertragungen werden jeweils als Adressen mit fester 32 Bit-Länge angegeben. Es gibt keine Mechanismen für zuverlässige Übertragung, Flusskontrolle und Sequenzierung, weswegen das darüber liegende Protokoll dies sicher stellen muss. Es gibt jedoch Möglichkeiten zur Paketfragmentierung, falls Datenpakete die maximale Segment Größe für Pakete der darunter liegenden Schicht überschreiten sollten.
 
-\begin{figure}[h]
-\centering
-\begin{tikzpicture}
-  \draw[line width = 0.75pt, align=center] (0,0) rectangle node{Urgent Bit\\(URG)} (2.5,1.5); 
-  \draw[line width = 0.75pt, align=center] (2.5,0) rectangle node{Acknow-\\ ledgment Bit\\(ACK)} (5,1.5);
-  \draw[line width = 0.75pt, align=center] (5,0) rectangle node{Push Bit\\(PSH)} (7.5,1.5);
-  \draw[line width = 0.75pt, align=center] (7.5,0) rectangle node{Reset Bit\\(RST)} (10,1.5);
-  \draw[line width = 0.75pt, align=center] (10,0) rectangle node{Synchronize Bit\\(SYN)} (12.5,1.5);
-  \draw[line width = 0.75pt, align=center] (12.5,0) rectangle node{Finish Bit\\(FIN)} (15,1.5);
-  \draw[line width = 0.75pt] (0,2) — node[above=2mm]{0} (0,1.5);
-  \draw[line width = 0.75pt] (7.5,2) — node[above=2mm]{3} (7.5,1.5);
-  \draw[line width = 0.75pt] (15,2) — node[above=2mm]{6} (15,1.5);
-\end{tikzpicture}
-\caption{TCP Control Bits}
-\label{fig_ControlBits}
-\end{figure}
 
 \begin{description}
 
@@ -87,39 +71,36 @@ Es handelt sich bei TCP um ein verbindungsorientiertes Protokoll. Das bedeutet, 
 \begin{figure}[h]
 \centering
 \begin{tikzpicture}
-  \draw[line width = 0.75pt, align=center] (0,0) rectangle node{Data} (16,1); 
-  \draw[line width = 0.75pt, align=center] (0,1) rectangle node{Option-Data \#N} (12,2); 
-  \draw[line width = 0.75pt, align=center] (12,1) rectangle node{Padding} (16,2); 
-  \draw[line width = 0.75pt, align=center] (0,2) rectangle node{Option-Kind \#N} (4,3); 
-  \draw[line width = 0.75pt, align=center] (4,2) rectangle node{Option-Length \#N} (8,3); 
-  \draw[line width = 0.75pt, align=center] (8,2) rectangle node{Option-Data \#N} (16,3); 
-  \draw[line width = 0.75pt, align=center] (0,3) rectangle node{...} (16,4); 
-  \draw[line width = 0.75pt, align=center] (0,4) rectangle node{Option-Kind \#1} (4,5); 
-  \draw[line width = 0.75pt, align=center] (4,4) rectangle node{Option-Length \#1} (8,5); 
-  \draw[line width = 0.75pt, align=center] (8,4) rectangle node{Option-Data \#1} (16,5);   
-  \draw[line width = 0.75pt, align=center] (0,5) rectangle node{Checksum} (8,6); 
-  \draw[line width = 0.75pt, align=center] (8,5) rectangle node{Urgent Pointer} (16,6);
-  \draw[line width = 0.75pt, align=center] (0,6) rectangle node{Data Offset} (2,7); 
-  \draw[line width = 0.75pt, align=center] (2,6) rectangle node{Reserved} (5,7); 
-  \draw[line width = 0.75pt, align=center] (5,6) rectangle node{Control Bits} (8,7); 
-  \draw[line width = 0.75pt, align=center] (8,6) rectangle node{Window} (16,7);
-  \draw[line width = 0.75pt, align=center] (0,7) rectangle node{Acknowledgment Number} (16,8); 
-  \draw[line width = 0.75pt, align=center] (0,8) rectangle node{Sequence Number} (16,9); 
-  \draw[line width = 0.75pt, align=center] (0,9) rectangle node{Source Port} (8,10); 
-  \draw[line width = 0.75pt, align=center] (8,9) rectangle node{Destination Port} (16,10); 
-  \draw[line width = 0.75pt] (0,10.5) — node[above=2mm]{0} (0,10);
-  \draw[line width = 0.75pt] (2,10.5) — node[above=2mm]{4} (2,10);
-  \draw[line width = 0.75pt] (4,10.5) — node[above=2mm]{8} (4,10);
-  \draw[line width = 0.75pt] (6,10.5) — node[above=2mm]{12} (6,10);
-  \draw[line width = 0.75pt] (8,10.5) — node[above=2mm]{16} (8,10);
-  \draw[line width = 0.75pt] (10,10.5) — node[above=2mm]{20} (10,10);
-  \draw[line width = 0.75pt] (12,10.5) — node[above=2mm]{24} (12,10);
-  \draw[line width = 0.75pt] (14,10.5) — node[above=2mm]{28} (14,10);
-  \draw[line width = 0.75pt] (16,10.5) — node[above=2mm]{32} (16,10);
+  \draw[line width = 0.75pt, align=center] (0,0) rectangle node{Data} (16,2); 
+  \draw[line width = 0.75pt, align=center] (0,2) rectangle node{Options} (12,3); 
+  \draw[line width = 0.75pt, align=center] (12,2) rectangle node{Padding} (16,3); 
+  \draw[line width = 0.75pt, align=center] (0,3) rectangle node{Options} (16,4); 
+  \draw[line width = 0.75pt, align=center] (0,4) rectangle node{Destination Address} (16,5); 
+  \draw[line width = 0.75pt, align=center] (0,5) rectangle node{Source Address} (16,6);    
+  \draw[line width = 0.75pt, align=center] (0,6) rectangle node{Time To Live (TTL)} (4,7); 
+  \draw[line width = 0.75pt, align=center] (4,6) rectangle node{Protocol} (8,7);
+  \draw[line width = 0.75pt, align=center] (8,6) rectangle node{Header Checksum} (16,7);
+  \draw[line width = 0.75pt, align=center] (0,7) rectangle node{Identification} (8,8); 
+  \draw[line width = 0.75pt, align=center] (8,7) rectangle node{Flags} (9.5,8); 
+  \draw[line width = 0.75pt, align=center] (9.5,7) rectangle node{Fragment Offset} (16,8); 
+  \draw[line width = 0.75pt, align=center] (0,8) rectangle node{Version} (2,9); 
+  \draw[line width = 0.75pt, align=center] (2,8) rectangle node{IHL} (4,9);
+  \draw[line width = 0.75pt, align=center] (4,8) rectangle node{Type Of Service (TOS)} (8,9); 
+  \draw[line width = 0.75pt, align=center] (8,8) rectangle node{Total Length (TL)} (16,9); 
+  \draw[line width = 0.75pt] (0,9.5) — node[above=2mm]{0} (0,9);
+  \draw[line width = 0.75pt] (2,9.5) — node[above=2mm]{4} (2,9);
+  \draw[line width = 0.75pt] (4,9.5) — node[above=2mm]{8} (4,9);
+  \draw[line width = 0.75pt] (6,9.5) — node[above=2mm]{12} (6,9);
+  \draw[line width = 0.75pt] (8,9.5) — node[above=2mm]{16} (8,9);
+  \draw[line width = 0.75pt] (10,9.5) — node[above=2mm]{20} (10,9);
+  \draw[line width = 0.75pt] (12,9.5) — node[above=2mm]{24} (12,9);
+  \draw[line width = 0.75pt] (14,9.5) — node[above=2mm]{28} (14,9);
+  \draw[line width = 0.75pt] (16,9.5) — node[above=2mm]{32} (16,9);
 \end{tikzpicture}
 \caption{TCP Segment Format}
 \label{fig_SegmentFormat}
 \end{figure}
+
 \begin{description}
 
 \item[Quell Port (16Bit): ] Gibt die Portnummer der Anwendung auf Senderseite an 
@@ -200,7 +181,7 @@ N := Anzahl der im letzten Ack bestätigten Sequenznummern
 \item[Fast Retransmit:] Findet statt, wenn mehrere ACKNOWLEDGE-Pakete für das selbe Segment empfangen werden. Dabei kann sicher davon ausgegangen werden, das dieses Segment verloren gegangen ist. In diesem Fall wird nicht auf einen Timetout für dieses Paket gewartet, stattdessen wird dieses sofort erneut gesendet.In den meisten Algorithmen wird ein {}"Fast"{} Retransmit nach einem drei mal wiederholten Acknowledge durchgeführt. Die Slow Start Threshold wird nach einem Fast Retransmit auf den Wert des halbierten Congestion Windows gesetzt und das \textit{Congestion Window} auf die neue \textit{Slow Start Threshold} gesetzt und um Drei erhöht. Damit wird die {}"Slow Start"{} Phase übersprungen. Durch die Ankunft der Acknowledge Pakete kann davon ausgegangen werden, das es in dem Netzwerk nur einen temporären Engpass gab. 
 \item[Fast Recovery:] Der {}"Fast Recovery"{} Algorithmus wird verwendet, wenn nach einem {}"Fast Retransmit"{} noch weitere duplizierte Acknowledge Pakete ankommen. Dabei werden wenn noch weitere Daten zum Senden bereitstehen diese gesendet, da davon ausgegangen wird, das nur das Paket das im {}"Fast Retransmit"{} gesendet wurde verloren gegangen ist und die Datenübertragung ohne große Geschwindigkeitseinbußen fortgesetzt werden kann. 
 
-\item[Timeout:] Wenn die Verbindung nicht mit den {}"Fast Retransmit{}" und {}"Fast Recovery{}" Algorithmen weitergeführt werden kann, oder erst gar keine Acknowledge Pakete ankommen, muss von einer größeren Überlastung oder Änderungen auf dem Übertragungsweg ausgegangen werden. Nachdem ein Paket einen bestimmten Zeitraum lang nicht bestätigt wurde wird dieses nochmal gesendet. In dem Fall wird die \textit{Slow Start Threshold} ebenfalls auf die Hälfte des\Textit{Congestion Windows} gesetzt. Das \textit{Congestion Window} selber wird dabei jedoch auf Eins gesetzt und die Übertragung mit dem {}"Slow Start{}" Algorithmus fortgesetzt. 
+\item[Timeout:] Wenn die Verbindung nicht mit den {}"Fast Retransmit{}" und {}"Fast Recovery{}" Algorithmen weitergeführt werden kann, oder erst gar keine Acknowledge Pakete ankommen, muss von einer größeren Überlastung oder Änderungen auf dem Übertragungsweg ausgegangen werden. Nachdem ein Paket einen bestimmten Zeitraum lang nicht bestätigt wurde wird dieses nochmal gesendet. In dem Fall wird die \textit{Slow Start Threshold} ebenfalls auf die Hälfte des\textit{Congestion Windows} gesetzt. Das \textit{Congestion Window} selber wird dabei jedoch auf Eins gesetzt und die Übertragung mit dem {}"Slow Start{}" Algorithmus fortgesetzt. 
 \end{description}
 
 \subsection{Verbindungsabbau}
@@ -230,7 +211,7 @@ Neben der IP-Adresse können auch andere Parameter abgefragt werden. Zum Beispie
 \item[SIAddr: ] Der Server gibt hier die Adresse des Servers an, dem der Client seine nächste Anfrage schicken soll. 
 \item[GIAddr: ] Wird nur im {}"Bootstrap Protocol{}" für die Kommunikation zwischen Client und Server verwendet, wenn diese nicht im selben Netzwerk oder Subnetz liegen. Wird im DHCP nicht dafür verwendet das Standardgateway anzugeben. 
 \item[CHAddr: ] Hardware Adresse des Clients. Bei Nutzung von Ethernet die Mac-Adresse. 
-\item[SName: ] Der DHCP Server kann hier optional seinen Namen angeben. Alternativ kann dieses Feld durch die }"option overload"{} Funktion auch für weitere Optionen genutzt werden.
+\item[SName: ] Der DHCP Server kann hier optional seinen Namen angeben. Alternativ kann dieses Feld durch die {}"option overload"{} Funktion auch für weitere Optionen genutzt werden.
 \item[File: ] Kann genutzt werden um bei einem DHCPDISCOVER oder OFFER eine Bootdatei anzugeben. 
 \item[Options: ] Für das Bootstrap Protokoll gibt es eine große Menge an Optionen, einige davon werden exklusiv für DHCP genutzt. \\
 Die Anzahl und Art der verwendeten Optionen ist variabel. Der Aufbau von diesen folgt jedoch einen definiertem Format. Die ersten 8 Bit eines Optionsblocks enthalten den Code der Option, weitere 8 Bit geben die Länge des folgenden Datenfeldes an. Das Optionfeld beginnt im Falle von DHCP mit der {}"Magic Number"{} 99.130.83.99 nur dann können die exklusiven DHCP Optionen genutzt werden.
@@ -277,7 +258,7 @@ Dazu gehören:
 
 Zu Beginn eines DHCP-Vorgangs, wenn zum Beispiel ein Client hochgefahren wird, verfügt dieser weder über eine IP-Adresse, noch über andere Information die Netzwerktopologie betreffend. Als Erstes sendet der Client ein Discover Paket. Dafür wird der Operationscode auf 1 gesetzt um ein Request-Paket zu signalisieren, die MAC-Adresse wird für die physische Client Adresse verwendet, das Broadcast-Flag wird gesetzt und der DHCP-Message-Type wird auf Discover gesetzt. Aus diesem DHCP-Paket wird ein UDP-Paket erzeugt, mit dem Quellport  68 und dem Zielport 67. Die Nachricht wird als Broadcast gesendet. \\
 Auf diese Anfrage können einer oder mehrere DHCP Server antworten. Wenn kein bestimmter in der DISCOVER-Nachricht spezifiziert wurde, schicken alle Server in dem jeweiligen Netzwerk ein "{}OFFER". Diese Nachricht wird ebenfalls als Broadcast gesendet, da der Client noch keine eigene IP zugewiesen hat. Das OFFER enhält einen Vorschlag mit einer IP-Adresse in dem Feld "Your IP Address". Anhand der "Transaction ID"{} und dem Feld CHADDR kann der Client die Offer eindeutig seiner Anfrage zuordnen. \\
-Der Client antwortet auf das "{}OFFER"{} mit einer "REQUEST"{} Nachricht. Dafür wird die Option "Requested IP Address"{} gesetzt. \\
+Der Client antwortet auf das "{}OFFER"{} mit einer {}"REQUEST"{} Nachricht. Dafür wird die Option "Requested IP Address"{} gesetzt. \\
 Auf das Request antwortet der Server wiederum mit einen ACK zu Bestätigung. Wenn der Client die Bestätigung erhält, prüft dieser ob die IP-Adresse schon genutzt wird, in dem er eine ARP Request für diese startet. Wird diese beantwortet ist die Adresse schon in Benutzung. Ist dies nicht der Fall übernimmt der Client die Adresse. 
 Die ACK Nachricht enthält die Lease-Zeit, welche angibt, wie lange eine IP gültig ist. 
 Nachdem die Hälfte der Lease-Zeit abgelaufen ist, sendet der Client eine weitere REQUEST-Nachricht. Da er zu diesem Zeitpunkt noch über eine gültige IP-Adresse verfügt sendet er die Nachricht nicht als Broadcast, sondern als Unicast direkt an den DHCP-Server, von dem er die IP zugewiesen bekommen hat. In dem Fall, das er auf die Request keine Antwort bekommen hat, startet er nach Ablauf der Lease Zeit mit einem DISCOVER.\\
@@ -289,4 +270,4 @@ Während dieses Vorgangs können neben der IP auch noch andere Informationen abg
 
 
 \section{AMIDAR Prozessor}
-Bei der Klasse der AMIDAR Prozessoren handelt es sich um rekonfigurierbare Systeme, die zur Laufzeit an die Anwendung angepasst werden können. Sie bestehen jeweils aus mehreren FUs, die über ein Token- und ein Datennetzwerk verbunden sind. Ein Token stell dabei eine Mikroinstruktion dar. Diese werden durch die Tokenmaschine aus den Prozessor-Instruktionen generiert. Dazu kommen FUs für Framestack, Heap, ALUs und Hardwarebeschleuniger. Bei den in Hardware implementierten Prototypen des Fachgebiets Rechnersysteme wird Java-Bytecode eingesetzt.
+Bei der Klasse der AMIDAR Prozessoren handelt es sich um rekonfigurierbare Systeme, die zur Laufzeit an die Anwendung angepasst werden können. Sie bestehen jeweils aus mehreren {}"Function Units"{}, die über ein Token- und ein Datennetzwerk verbunden sind. Ein Token stell dabei eine Mikroinstruktion dar. Diese werden durch die Tokenmaschine aus den Prozessor-Instruktionen generiert. Dazu kommen FUs für Framestack, Heap, ALUs und Hardwarebeschleuniger. Bei den in Hardware implementierten Prototypen des Fachgebiets Rechnersysteme wird Java-Bytecode eingesetzt.
