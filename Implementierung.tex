@@ -2,11 +2,17 @@
 Im Rahmen dieser Arbeit wurde ein TCP Stack für die API des AMIDAR Microprozessor entwickelt. Darüber hinaus wurde der schon vorhandene IP-Stack angepasst um die gestellten Anforderungen erfüllen zu können. Zusätzlich wurde auch die Unterstützung für DHCP hinzugefügt.
 
 \section{Überblick}
-Vor Beginn dieses Projekts verfügte die AMIDAR Java API über grundlegende Netzwerk Funktionen. Dazu gehört der Netzwerktreiber, ein IP-Stack mit ARP Funktionalität und ein UDP Stack. Neu geschrieben wurde im Rahmen dieses Projekts der multithreading fähige TCP Stack. Dieser wurde in die vorhandene Software integriert. Des weiteren wurde der IP-Stack erweitert und optimiert.\\\\
+Vor Beginn diesen Projekts verfügte die AMIDAR Java API über grundlegende Netzwerk Funktionen. Dazu gehört der Netzwerktreiber, ein IP-Stack mit ARP Funktionalität und ein UDP Stack. Neu geschrieben wurde im Rahmen dieses Projekts der multithreading fähige TCP Stack. Dieser wurde in die vorhandene Software integriert. Des weiteren wurde der IP-Stack erweitert und optimiert.\\\\
 Sowohl beim Senden als auch beim Empfangen von Datenpaketen greifen die einzelnen Module ineinander über. Zum Empfangen von Daten prüft der Prozess des Netzwerktreibers ob neue Ethernet Frames vorliegen. Wenn das der Fall ist, wird eine Funktion im IP Stack aufgerufen, die die Ethernet Frames überprüft. Der IP-Stack unterscheidet die Pakete zwischen ARP und IP. ARP Anfragen werden geprüft und gegebenenfalls beantwortet. Handelt es sich bei dem Datagramm um ein IP-Paket, wird ein entsprechendes Objekt erzeugt und nach weiterer Überprüfung entweder an den UDP-Stack oder an den TCP-Stack übergeben. Die Stacks für TCP und UDP beinhalten jeweils einen Table mit den vorhandenen Verbindungen, die durch Ziel und Quell Port identifiziert werden können. Ihnen können gegebenenfalls die erzeugten Pakete weiter gegeben werden, wo sie zwischengespeichert werden. Im Falle von UDP wird die Payload ausgelesen, wenn die \textit{receive} Methode der UDP-Connection, von einen anderen Thread aufgerufen wird. Die TCP-Connections können jeweils in ihren eigenen Thread laufen, da eine zeitnahe Verarbeitung der angekommen Pakete nötig ist um die Verbindung zu managen. In diesem Thread werden die angekommenen Pakete ausgewertet und die dazu entsprechenden Reaktionen berechnet und ausgeführt. \\
 Wenn UDP Datenpakete versendet werden sollen, wird die \textit{send} Methode aufgerufen, die ein UDP-Paket erzeugt und diesen an den UDP-Stack weitergibt. Der wiederum ruft den erzeugt aus dem UDP-Paket ein IP-Paket. Mit dem die \textit{send} Methode des IP-Stacks aufgerufen wird. Die letztendlich einen Ethernetframe erzeugt und mit den EthernetWrapper den Sendevorgang startet.\\ \\
 Bei dem senden von Daten über TCP wird von der Anwendung der ebenfalls die \textit{send} Methode der TCP-Connection aufgerufen. Die Daten werden dabei jedoch nicht sofort gesendet, sondern in einen Puffer zwischengespeichert, vorausgesetzt der aktuelle Status der Verbindung erlaubt das. Bei Ausführung des Threads der Verbindung, werden gegebenenfalls die zu übertragenden TCP-Pakete in IP Pakete umgewandelt und analog wie die UDP-Pakete versendet. 
 
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\textwidth]{Graphics/TCPStack.png}
+	\caption{Auszug Klassendiagramm TCP/IP}		
+\end{figure}
 
 
 \section{IP Stack}

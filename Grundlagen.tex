@@ -29,12 +29,45 @@ Dazu kommen 2 Byte, die den Typ des darüber liegenden Protokolls angeben. Zum B
 
 
 \section{Internet Protocol Version 4 (IPv4)}
+
+
 Das IP Protokoll ist das für die Datenübertragung wichtigste Protokoll auf der Vermittlungsschicht. Es wurde entwickelt um eine Paket vermittelte Kommunikation über mehrere Computernetzwerke hinweg zu ermöglichen. Quellen und Ziele der Übertragungen werden jeweils als Adressen mit fester 32 Bit-Länge angegeben. Es gibt keine Mechanismen für zuverlässige Übertragung, Flusskontrolle und Sequenzierung, weswegen das darüber liegende Protokoll dies sicher stellen muss. Es gibt jedoch Möglichkeiten zur Paketfragmentierung, falls Datenpakete die maximale Segment Größe für Pakete der darunter liegenden Schicht überschreiten sollten.
 
+\subsection{Paket Aufbau}
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+  \draw[line width = 0.75pt, align=center] (0,0) rectangle node{Data} (16,2); 
+  \draw[line width = 0.75pt, align=center] (0,2) rectangle node{Options} (12,3); 
+  \draw[line width = 0.75pt, align=center] (12,2) rectangle node{Padding} (16,3); 
+  \draw[line width = 0.75pt, align=center] (0,3) rectangle node{Options} (16,4); 
+  \draw[line width = 0.75pt, align=center] (0,4) rectangle node{Destination Address} (16,5); 
+  \draw[line width = 0.75pt, align=center] (0,5) rectangle node{Source Address} (16,6);    
+  \draw[line width = 0.75pt, align=center] (0,6) rectangle node{Time To Live (TTL)} (4,7); 
+  \draw[line width = 0.75pt, align=center] (4,6) rectangle node{Protocol} (8,7);
+  \draw[line width = 0.75pt, align=center] (8,6) rectangle node{Header Checksum} (16,7);
+  \draw[line width = 0.75pt, align=center] (0,7) rectangle node{Identification} (8,8); 
+  \draw[line width = 0.75pt, align=center] (8,7) rectangle node{Flags} (9.5,8); 
+  \draw[line width = 0.75pt, align=center] (9.5,7) rectangle node{Fragment Offset} (16,8); 
+  \draw[line width = 0.75pt, align=center] (0,8) rectangle node{Version} (2,9); 
+  \draw[line width = 0.75pt, align=center] (2,8) rectangle node{IHL} (4,9);
+  \draw[line width = 0.75pt, align=center] (4,8) rectangle node{Type Of Service (TOS)} (8,9); 
+  \draw[line width = 0.75pt, align=center] (8,8) rectangle node{Total Length (TL)} (16,9); 
+  \draw[line width = 0.75pt] (0,9.5) -- node[above=2mm]{0} (0,9);
+  \draw[line width = 0.75pt] (2,9.5) -- node[above=2mm]{4} (2,9);
+  \draw[line width = 0.75pt] (4,9.5) -- node[above=2mm]{8} (4,9);
+  \draw[line width = 0.75pt] (6,9.5) -- node[above=2mm]{12} (6,9);
+  \draw[line width = 0.75pt] (8,9.5) -- node[above=2mm]{16} (8,9);
+  \draw[line width = 0.75pt] (10,9.5) -- node[above=2mm]{20} (10,9);
+  \draw[line width = 0.75pt] (12,9.5) -- node[above=2mm]{24} (12,9);
+  \draw[line width = 0.75pt] (14,9.5) -- node[above=2mm]{28} (14,9);
+  \draw[line width = 0.75pt] (16,9.5) -- node[above=2mm]{32} (16,9);
+\end{tikzpicture}
+\caption{IP Segment Format}
+\label{fig_SegmentFormat}
+\end{figure}
 
 \begin{description}
-
-
 \item[Version: ]Gibt an welche Version des IP Protokolls verwendet wird. (4Bit)
 \item[IHL: ]Steht für Internet Header Length und gibt an wie viele 32-Bit-Wörter von dem IP-Header belegt werden.
 \item[ToS: ]Type of Service beinhaltet abstrakte Parameter zur Bestimmung der Qualität des gewünschten Services. Dabei geben die Bits Null bis Zwei die Priorität der Daten an. Die Bits Drei, Vier und Fünf stehen für niedrige Latenz, hohen Durchsatz und hohe Zuverlässigkeit. Die letztgenannten Parameter werden von Netzwerkgeräten unterschiedlich interpretiert, in den meisten ruft bessere Performance für einen der Parameter eine Verschlechterung bei einem anderen herbei.
@@ -57,49 +90,20 @@ Um mehrere Netzwerke innerhalb eines Großen zu ermöglichen, werden IP Adressen
 \subsection{Fragmentierung}
 
 Paketfragmentierung wird nötig wenn ein Paket aus einem Netzwerk kommt das eine große maximale Segmentgröße erlaubt und durch Eines geleitet wird, das nur eine kleinere Segmentgröße erlaubt, dabei können die Pakete in eine theoretisch nahezu endlose Anzahl von kleinen Paketen zerlegt werden, wobei die Datenblocks aller Fragmente bis auf das Letzte ein vielfaches von 64 Byte an Daten beinhalten müssen.\\\\
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=0.75\textwidth]{Graphics/IPfragmentation.png}
+	\caption{IP-Paket Fragmentierung}
+\end{figure}
 Damit fragmentierte Paket richtig zusammengesetzt werden können, haben alle Fragmente, eines Pakets, die gleiche Identifikationsnummer. Für das Zusammensetzen des Datenblock wird der Fragmentoffset benötigt der angibt an welcher Stelle des ursprünglichen Datenblocks die Daten des Fragments stehen. Wobei das fragmented-flag angibt, ob noch weitere Fragmente folgen, oder ob dies das letzte Teil ist. Sobald alle Fragmente eines Pakets beim Ziel eingetroffen sind, kann das ursprüngliche Paket wiederhergestellt werden. 
-\clearpage 
 
+\FloatBarrier
 \section{Transmission Control Protocol (TCP)}
 Da die Protokolle der unteren Schichten, IP und Ethernet, keine fehlerfreie und verlustlose Übertragung der Daten garantieren können wird ein Protokoll auf der Transportschicht benötigt, das eine zuverlässige Übertragung von Daten zwischen Anwendungen auf entfernten Hosts sicherstellen kann, auch wenn auf jeden Hosts eine große Anzahl an Anwendungen läuft, die TCP verwenden. Für diesen Zweck wurde das TCP-Protokoll erschaffen. Um dabei die Datenpakete jeweils der richtigen Anwendung zuordnen zu können werden Port-Nummern verwendet. \\\\
 Es handelt sich bei TCP um ein verbindungsorientiertes Protokoll. Das bedeutet, dass es zu Beginn einer Übertragung einen klar definierten Verbindungsaufbau gibt. Nachdem die Verbindung etabliert ist können Daten vollduplex übertragen werden. Wobei durch Sequenz-Nummern und Acknowledge-Nummern die richtige Reihenfolge und Vollständigkeit der Datenpakete sichergestellt wird. Pakete, deren Erhalt nicht bestätigt wurde werden automatisch neu übertragen. Des weiteren verfügt TCP über Mechanismen um eine Überlast auf dem Übertragungsweg rechtzeitig zu erkennen und zu beheben.  
 
 \subsection{Paketaufbau}
 
-%Hier Bild vom TCP Header einfügen. 
-
-\begin{figure}[h]
-\centering
-\begin{tikzpicture}
-  \draw[line width = 0.75pt, align=center] (0,0) rectangle node{Data} (16,2); 
-  \draw[line width = 0.75pt, align=center] (0,2) rectangle node{Options} (12,3); 
-  \draw[line width = 0.75pt, align=center] (12,2) rectangle node{Padding} (16,3); 
-  \draw[line width = 0.75pt, align=center] (0,3) rectangle node{Options} (16,4); 
-  \draw[line width = 0.75pt, align=center] (0,4) rectangle node{Destination Address} (16,5); 
-  \draw[line width = 0.75pt, align=center] (0,5) rectangle node{Source Address} (16,6);    
-  \draw[line width = 0.75pt, align=center] (0,6) rectangle node{Time To Live (TTL)} (4,7); 
-  \draw[line width = 0.75pt, align=center] (4,6) rectangle node{Protocol} (8,7);
-  \draw[line width = 0.75pt, align=center] (8,6) rectangle node{Header Checksum} (16,7);
-  \draw[line width = 0.75pt, align=center] (0,7) rectangle node{Identification} (8,8); 
-  \draw[line width = 0.75pt, align=center] (8,7) rectangle node{Flags} (9.5,8); 
-  \draw[line width = 0.75pt, align=center] (9.5,7) rectangle node{Fragment Offset} (16,8); 
-  \draw[line width = 0.75pt, align=center] (0,8) rectangle node{Version} (2,9); 
-  \draw[line width = 0.75pt, align=center] (2,8) rectangle node{IHL} (4,9);
-  \draw[line width = 0.75pt, align=center] (4,8) rectangle node{Type Of Service (TOS)} (8,9); 
-  \draw[line width = 0.75pt, align=center] (8,8) rectangle node{Total Length (TL)} (16,9); 
-  \draw[line width = 0.75pt] (0,9.5) — node[above=2mm]{0} (0,9);
-  \draw[line width = 0.75pt] (2,9.5) — node[above=2mm]{4} (2,9);
-  \draw[line width = 0.75pt] (4,9.5) — node[above=2mm]{8} (4,9);
-  \draw[line width = 0.75pt] (6,9.5) — node[above=2mm]{12} (6,9);
-  \draw[line width = 0.75pt] (8,9.5) — node[above=2mm]{16} (8,9);
-  \draw[line width = 0.75pt] (10,9.5) — node[above=2mm]{20} (10,9);
-  \draw[line width = 0.75pt] (12,9.5) — node[above=2mm]{24} (12,9);
-  \draw[line width = 0.75pt] (14,9.5) — node[above=2mm]{28} (14,9);
-  \draw[line width = 0.75pt] (16,9.5) — node[above=2mm]{32} (16,9);
-\end{tikzpicture}
-\caption{TCP Segment Format}
-\label{fig_SegmentFormat}
-\end{figure}
 
 \begin{description}
 
@@ -110,6 +114,22 @@ Es handelt sich bei TCP um ein verbindungsorientiertes Protokoll. Das bedeutet, 
 \item[Data Offset (4Bit): ] Anzahl von 32Bit Wörtern aus denen der Header besteht. 
 \item[Reserved (6Bit): ] reserviert für zukünftige Nutzung
 \item[Steuerungsbits (6Bit): ] 6 Flags die für die Ablauf-Steuerung der Übertragung genutzt werden: 
+\begin{figure}[htp]
+\centering
+\begin{tikzpicture}
+  \draw[line width = 0.75pt, align=center] (0,0) rectangle node{Urgent Bit\\(URG)} (2.5,1.5); 
+  \draw[line width = 0.75pt, align=center] (2.5,0) rectangle node{Acknow-\\ ledgment Bit\\(ACK)} (5,1.5);
+  \draw[line width = 0.75pt, align=center] (5,0) rectangle node{Push Bit\\(PSH)} (7.5,1.5);
+  \draw[line width = 0.75pt, align=center] (7.5,0) rectangle node{Reset Bit\\(RST)} (10,1.5);
+  \draw[line width = 0.75pt, align=center] (10,0) rectangle node{Synchronize Bit\\(SYN)} (12.5,1.5);
+  \draw[line width = 0.75pt, align=center] (12.5,0) rectangle node{Finish Bit\\(FIN)} (15,1.5);
+  \draw[line width = 0.75pt] (0,2) -- node[above=2mm]{0} (0,1.5);
+  \draw[line width = 0.75pt] (7.5,2) -- node[above=2mm]{3} (7.5,1.5);
+  \draw[line width = 0.75pt] (15,2) -- node[above=2mm]{6} (15,1.5);
+\end{tikzpicture}
+\caption{TCP Control Bits}
+\label{fig_ControlBits}
+\end{figure}
 \begin{itemize}
 \item[URG: ] Urgent Pointer, wird in moderner Software nicht mehr genutzt und wird von vielen Implementierungen ignoriert. 
 \item[ACK: ] Acknowledgment gibt an, ob das Paket eine gültige Bestätigung für empfangene Pakete enthält.
@@ -123,10 +143,49 @@ Es handelt sich bei TCP um ein verbindungsorientiertes Protokoll. Das bedeutet, 
 \item[Options: (Variabel): ]  Optionale Informationen, die von TCP Implementierungen unterstützt werden können um Sicherheit und Performance zu verbessern. Optionen bestehen entweder nur aus einem Optionsbyte oder haben zusätzlich ein weiteres Byte das die Länge der jeweiligen Option angibt. 
 \item[Padding: ] Falls der TCP Header mit den Optionen einen teilweise genutzten 32Bit Block hat, wird dieser mit Nullen aufgefüllt. 
 \end{description}
+\begin{figure}[htp]
+\centering
+\begin{tikzpicture}
+  \draw[line width = 0.75pt, align=center] (0,0) rectangle node{Data} (16,1); 
+  \draw[line width = 0.75pt, align=center] (0,1) rectangle node{Option-Data \#N} (12,2); 
+  \draw[line width = 0.75pt, align=center] (12,1) rectangle node{Padding} (16,2); 
+  \draw[line width = 0.75pt, align=center] (0,2) rectangle node{Option-Kind \#N} (4,3); 
+  \draw[line width = 0.75pt, align=center] (4,2) rectangle node{Option-Length \#N} (8,3); 
+  \draw[line width = 0.75pt, align=center] (8,2) rectangle node{Option-Data \#N} (16,3); 
+  \draw[line width = 0.75pt, align=center] (0,3) rectangle node{...} (16,4); 
+  \draw[line width = 0.75pt, align=center] (0,4) rectangle node{Option-Kind \#1} (4,5); 
+  \draw[line width = 0.75pt, align=center] (4,4) rectangle node{Option-Length \#1} (8,5); 
+  \draw[line width = 0.75pt, align=center] (8,4) rectangle node{Option-Data \#1} (16,5);   
+  \draw[line width = 0.75pt, align=center] (0,5) rectangle node{Checksum} (8,6); 
+  \draw[line width = 0.75pt, align=center] (8,5) rectangle node{Urgent Pointer} (16,6);
+  \draw[line width = 0.75pt, align=center] (0,6) rectangle node{Data Offset} (2,7); 
+  \draw[line width = 0.75pt, align=center] (2,6) rectangle node{Reserved} (5,7); 
+  \draw[line width = 0.75pt, align=center] (5,6) rectangle node{Control Bits} (8,7); 
+  \draw[line width = 0.75pt, align=center] (8,6) rectangle node{Window} (16,7);
+  \draw[line width = 0.75pt, align=center] (0,7) rectangle node{Acknowledgment Number} (16,8); 
+  \draw[line width = 0.75pt, align=center] (0,8) rectangle node{Sequence Number} (16,9); 
+  \draw[line width = 0.75pt, align=center] (0,9) rectangle node{Source Port} (8,10); 
+  \draw[line width = 0.75pt, align=center] (8,9) rectangle node{Destination Port} (16,10); 
+  \draw[line width = 0.75pt] (0,10.5) -- node[above=2mm]{0} (0,10);
+  \draw[line width = 0.75pt] (2,10.5) -- node[above=2mm]{4} (2,10);
+  \draw[line width = 0.75pt] (4,10.5) -- node[above=2mm]{8} (4,10);
+  \draw[line width = 0.75pt] (6,10.5) -- node[above=2mm]{12} (6,10);
+  \draw[line width = 0.75pt] (8,10.5) -- node[above=2mm]{16} (8,10);
+  \draw[line width = 0.75pt] (10,10.5) -- node[above=2mm]{20} (10,10);
+  \draw[line width = 0.75pt] (12,10.5) -- node[above=2mm]{24} (12,10);
+  \draw[line width = 0.75pt] (14,10.5) -- node[above=2mm]{28} (14,10);
+  \draw[line width = 0.75pt] (16,10.5) -- node[above=2mm]{32} (16,10);
+\end{tikzpicture}
+\caption{TCP Segment Format}
+\label{fig_SegmentFormat}
+\end{figure}
 
+\FloatBarrier
 \subsection{Zustände}
 TCP ist im Gegensatz zu den bisher genannt Protokollen zustandsorientiert, was bedeutet, das es je nach Zustand anders auf Nutzeraktionen und ankommende Pakete reagiert. 
 Zu den Zuständen gehören :
+
+
 
 \begin{description}
 
@@ -139,7 +198,7 @@ Zu den Zuständen gehören :
 \item[CLOSING: ]	Wartet auf das letzte ACK-Paket und wechselt, wenn dieses ankommt in den Zustand TIME-WAIT.
 \item[TIME-WAIT: ] Hält die Verbindung nach Beendigung einige Minuten offen, um auf verzögerte Pakete zu reagieren.
 \end{description}
-%add vereinfachter Zustandsautomat für TCP
+
 \subsection{Nutzeraufrufe}
 Zu den Zuständen kommen noch eine Reihe von Ereignissen, auf die, abhängig von den jeweiligen Zuständen, entsprechend reagiert werden muss. 
 Dazu gehören neben eintreffenden Paketen und Timeouts die Usercalls.
@@ -151,14 +210,27 @@ Dazu gehören neben eintreffenden Paketen und Timeouts die Usercalls.
 \item[CLOSE: ] Initiiert den Abbau der Verbindung, wenn es keine Daten mehr zu  übertragen gibt.
 \item[ABORT: ] Bricht die Verbindung ab. In den meisten Zuständen wird in dem Fall ein Reset Paket gesendet.
 \end{description}
+
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=1\textwidth]{Graphics/tcp_Statemachine.png}
+	\caption{vereinfachter Zustandsautomat TCP}
+
+\end{figure}
+\FloatBarrier
 \subsection{Sequenznummern}
 Ein wichtiges Grundprinzip von TCP ist, dass jedes Byte an Daten eine eigene Sequenznummer zugewiesen werden kann. Dadurch ist es möglich, das jedes Byte einzeln bestätigt werden kann. Der in TCP dazu verwendete Mechanismus arbeitet kumulativ. Das bedeutet, wenn eine Sequenznummer bestätigt wird, alle Sequenznummern kleiner als die Bestätigungsnummer als angekommen gelten. Dadurch wird es einfach den Verlust einzelner Pakete zu erkennen und diese nochmal zu senden. Das erste Byte eines Datenpaketes entspricht dabei der Sequenznummer des Pakets. 
 
 \subsection{Verbindungsaufbau}
 Um zuverlässig einen sicheren Verbindungsaufbau zu gewährleisten verwendet TCP einen Drei-Wege-Handshake. Soll eine neue Verbindung aufgebaut werden wird die Initiale Sequenznummer zuverlässig generiert. Das SYN Paket enthält nur den HEADER mit der um eins inkrementierten, initialen Sequenznummer und den SYN Flag gesetzt. Nach dem Sendevorgang wird in den Zustand SYN-SENT gewechselt. Wenn die Empfängerseite sich im Zustand LISTEN befindet, kann die Verbindungsanfrage bestätigt werden. Dafür wird ebenfalls eine initiale Sequenznummer generiert. Zur Antwort wird ein Paket erzeugt, das die neue initiale Sequenznummer verwendet und als Acknummer die um eins erhöhte Sequenznummer des SYN Pakets verwendet. Die Flags für SYN und ACK werden gesetzt. Nach dem Senden wird in den Zustand SYN-RECEIVED gewechselt.\\
 Nach dem Erhalt des SYN-ACK Pakets sendet die initiierende Seite ein leeres ACK Paket und wechselt in den ESTABLISHED Zustand. 
-%Sequenzdiagramm
 
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.6\textwidth]{Graphics/tcp_Handshake.png}
+	\caption{TCP Handshake mit Zustandstransitionen}
+\end{figure}
+\FloatBarrier
 \subsection{Datenübertragung}
 
 Wenn beide Seiten einer Verbindung den Established-Zustand erreicht haben, kann die eigentliche beidseitige Datenübertragung beginnen. Dabei wird die Übertragung der Daten als kontinuierlicher Datenstrom abstrahiert. Eine Anwendung schreibt dabei Bytes auf einen Datenpuffer im TCP-Stack. Die Daten werden nicht sofort übertragen, da sonst viele Pakete mit wenig Nutzdaten gesendet würden und die Verbindung schnell überlastet wäre, wobei ein großer Teil der übertragenen Daten für den durch TCP-, IP- und Ethernet-Header erzeugten Overhead genutzt werden müssten. Sobald der Schreibpuffer eine bestimmte Größe erreicht hat oder die Software einen PUSH signalisiert, wird ein TCP-Paket erzeugt, das die Daten aus dem Puffer überträgt. Jedes Datenpaket wird mit einem Zeitstempel in der Retransmitqueue zwischengespeichert bis der Erhalt dieses bestätigt wurde. Nach dem Eintreffen eines Pakets, dessen ACK Flag gesetzt wurde, gelten alle Pakete, deren Sequenznummer unter der Acknowledge-Nummer des angekommenen Paktes liegen als bestätigt. Diese werden aus der Retransmitqueue entfernt. Wenn für ein Paket eine bestimmte Zeit lang keine Bestätigung eingetroffen ist, wird dieses nochmal gesendet. 
@@ -166,11 +238,11 @@ Wenn beide Seiten einer Verbindung den Established-Zustand erreicht haben, kann 
 \subsection{Überlastkontrolle}
 
 Ein weiterer Schwerpunkt bei TCP ist das Verhindern der Überlastung des Netzwerks, das zwischen Sender und Empfänger liegt, als auch die des Empfängers selber. 
-Die beiden Mechanismen werden {}"Flow Control"{} und {}"Congestion Control"{} genannt. 
-{}"Flow Control{}" verhindert dabei die Überlastung des Empfängers und {}"Congestion Control{}" die des Übertragungsweges. \\\\
-Für das Senden von Daten wird für Flow und {}"Congestion Control{}" jeweils ein Fenster bestimmt. Das Fenster gibt an, wie viele Bytes gesendet werden können, ohne dass die Vorherigen bestätigt wurden. Wenn die Differenz der Sequenznummern und der letzten erhaltenen Acknowledgenummer so groß ist wie das Fenster, werden keine neuen Datenpakete mehr versendet, bis weitere Pakete bestätigt wurden. Es wird jeweils das kleinere Fenster als Grenze genommen. \\\\
+Die beiden Mechanismen werden "{}Flow Control"{} und "{}Congestion Control"{} genannt. 
+{}"Flow Control{}" verhindert dabei die Überlastung des Empfängers und "{}Congestion Control{}" die des Übertragungsweges. \\\\
+Für das Senden von Daten wird für Flow und "{}Congestion Control"{} jeweils ein Fenster bestimmt. Das Fenster gibt an, wie viele Bytes gesendet werden können, ohne dass die Vorherigen bestätigt wurden. Wenn die Differenz der Sequenznummern und der letzten erhaltenen Acknowledgenummer so groß ist wie das Fenster, werden keine neuen Datenpakete mehr versendet, bis weitere Pakete bestätigt wurden. Es wird jeweils das kleinere Fenster als Grenze genommen. \\\\
 Die Größe des Flow {}"Control Windows{}" des Empfänger wird im TCP Header der von ihm versendeten Pakete angegeben. 
-Das Problem bei der {}"Congestion Control{}" ist, das die Kapazität der Verbindung nicht trivial zu bestimmen ist. Für eine Annäherung kommen im Normalfall vier Algorithmen zum Einsatz. Mit Hilfe der Variable \textit{Slow Start Threshold} wird festgelegt, welcher der Algorithmen im aktuellen Zeitpunkt zum Einsatz kommt. So lange die Größe des \textit{Congestion Windows} unter der \textit{Slow Start Threshold} liegt, wird der {}"Slow Start"{} Algorithmus verwendet. Eine Überlastung der Verbindung kann festgestellt werden, wenn mehrere Acknowledge Pakete für dieselbe Sequenznummer empfangen werden.\\\\
+Das Problem bei der "{}Congestion Control"{} ist, das die Kapazität der Verbindung nicht trivial zu bestimmen ist. Für eine Annäherung kommen im Normalfall vier Algorithmen zum Einsatz. Mit Hilfe der Variable \textit{Slow Start Threshold} wird festgelegt, welcher der Algorithmen im aktuellen Zeitpunkt zum Einsatz kommt. So lange die Größe des \textit{Congestion Windows} unter der \textit{Slow Start Threshold} liegt, wird der "{}Slow Start"{} Algorithmus verwendet. Eine Überlastung der Verbindung kann festgestellt werden, wenn mehrere Acknowledge Pakete für dieselbe Sequenznummer empfangen werden.\\\\
 Zu Beginn einer Übertragung liegen noch keine Informationen über die mögliche Bandbreite des Netzwerks vor, weswegen die Bandbreite langsam sondiert werden muss. Dabei wird der {}"Slow Start"{} Algorithmus genutzt, bis durch schnelles Ansteigen der Übertragungsrate der Grenzwert erreicht wird. Die {}"Slow Start"{} Phase wird genutzt, bis die Größe des Congestion Windows die \textit{Slow Start Threshold} übersteigt oder eine Überlastung der Verbindung festgestellt wird. Da die Grenze der Verbindungskapazität sondiert werden soll wird die Slow Start Threshold zu Beginn auf einen Wert gesetzt, der nicht erreicht werden kann. wenn es zu einen Packet Timeout, wird die \textit{Slow Start Threshold} auf einen Wert, der einem Bruchteil des erreichten Fensters entspricht, gesetzt und der {}"Slow Start"{} Algorithmus, mit einen größeren Initialen Fenster, weiter verwendet. Diesmal wird die {}"Slow Start Phase"{} durch das Überschreiten der \textit{Slow Start Threshhold} beendet. Für den Rest der Übertragung wechseln sich die beiden Algorithmen ab, bis die Verbindung beendet ist.\\\\
 Es gibt eine Reihe von Varianten für die Congestion Control Implementierung. Alle davon verwenden eine Variation der folgenden Algorithmen. Hier wird als Beispiel die Reno Variante genannt.
 
@@ -196,10 +268,41 @@ Neben der IP-Adresse können auch andere Parameter abgefragt werden. Zum Beispie
 \subsection{Paket Format DHCP (Bootstrap)}
 %Bild einfügen
 
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+  \draw[line width = 0.75pt, align=center] (0,0) rectangle node{Vendor-Specific Area (64 bytes)} (16,1); 
+  \draw[line width = 0.75pt, align=center] (0,1) rectangle node{Boot Filename (128 bytes)} (16,2); 
+  \draw[line width = 0.75pt, align=center] (0,2) rectangle node{Server Name (SName) (64 bytes)} (16,3); 
+  \draw[line width = 0.75pt, align=center] (0,3) rectangle node{Client Hardware Address (CHAddr) (16 bytes)} (16,4); 
+  \draw[line width = 0.75pt, align=center] (0,4) rectangle node{Gateway IP Address (GIAddr)} (16,5); 
+  \draw[line width = 0.75pt, align=center] (0,5) rectangle node{Server IP Address (SIAddr)} (16,6); 
+  \draw[line width = 0.75pt, align=center] (0,6) rectangle node{"{}Your"{} IP Address (YIAddr)} (16,7); 
+  \draw[line width = 0.75pt, align=center] (0,7) rectangle node{Client IP Address (CIAddr)} (16,8); 
+  \draw[line width = 0.75pt, align=center] (0,8) rectangle node{Seconds} (8,9); 
+  \draw[line width = 0.75pt, align=center] (8,8) rectangle node{Flags} (16,9); 
+  \draw[line width = 0.75pt, align=center] (0,9) rectangle node{Transaction Identifier} (16,10); 
+  \draw[line width = 0.75pt, align=center] (0,10) rectangle node{Operation Code} (4,11); 
+  \draw[line width = 0.75pt, align=center] (4,10) rectangle node{Hardware Type} (8,11); 
+  \draw[line width = 0.75pt, align=center] (8,10) rectangle node{Hardware Address\\ Length} (12,11); 
+  \draw[line width = 0.75pt, align=center] (12,10) rectangle node{Hops} (16,11); 
+  \draw[line width = 0.75pt] (0,11.5) -- node[above=2mm]{0} (0,11);
+  \draw[line width = 0.75pt] (2,11.5) -- node[above=2mm]{4} (2,11);
+  \draw[line width = 0.75pt] (4,11.5) -- node[above=2mm]{8} (4,11);
+  \draw[line width = 0.75pt] (6,11.5) -- node[above=2mm]{12} (6,11);
+  \draw[line width = 0.75pt] (8,11.5) -- node[above=2mm]{16} (8,11);
+  \draw[line width = 0.75pt] (10,11.5) -- node[above=2mm]{20} (10,11);
+  \draw[line width = 0.75pt] (12,11.5) -- node[above=2mm]{24} (12,11);
+  \draw[line width = 0.75pt] (14,11.5) -- node[above=2mm]{28} (14,11);
+  \draw[line width = 0.75pt] (16,11.5) -- node[above=2mm]{32} (16,11);
+\end{tikzpicture}
+\caption{BOOTP Message Format}
+\label{fig_BMF}
+\end{figure}
+--
 \begin{description}
 
 \item[Op: ] Gibt den generellen Typ der Nachricht an. Ein Wert von Eins signalisiert eine Anfrage, wobei eine Zwei eine Antwort signalisiert.
-
 \item[HType: ] Spezifiziert die Art der dem Netzwerk zugrunde liegende Hardware. Der Code 1 steht dabei für Ethernet. 
 \item[HLen: ] Bezeichnet die Länge der physischen Adressen im Netzwerk. Im Falle von Ethernet Netzwerken sind dies 6 Byte. 
 \item[Hops: ] Wird beim Absenden auf Null gesetzt und von jedem {}"Relay Agent" um Eins erhöht. 
@@ -264,10 +367,16 @@ Die ACK Nachricht enthält die Lease-Zeit, welche angibt, wie lange eine IP gül
 Nachdem die Hälfte der Lease-Zeit abgelaufen ist, sendet der Client eine weitere REQUEST-Nachricht. Da er zu diesem Zeitpunkt noch über eine gültige IP-Adresse verfügt sendet er die Nachricht nicht als Broadcast, sondern als Unicast direkt an den DHCP-Server, von dem er die IP zugewiesen bekommen hat. In dem Fall, das er auf die Request keine Antwort bekommen hat, startet er nach Ablauf der Lease Zeit mit einem DISCOVER.\\
 Während dieses Vorgangs können neben der IP auch noch andere Informationen abgefragt werden. Wie beispielsweise die Adressen von DNS- und Zeitservern.
 
-%Bild eines DHCP Ablaufs. 
-
 
 
 
 \section{AMIDAR Prozessor}
 Bei der Klasse der AMIDAR Prozessoren handelt es sich um rekonfigurierbare Systeme, die zur Laufzeit an die Anwendung angepasst werden können. Sie bestehen jeweils aus mehreren {}"Function Units"{}, die über ein Token- und ein Datennetzwerk verbunden sind. Ein Token stell dabei eine Mikroinstruktion dar. Diese werden durch die Tokenmaschine aus den Prozessor-Instruktionen generiert. Dazu kommen FUs für Framestack, Heap, ALUs und Hardwarebeschleuniger. Bei den in Hardware implementierten Prototypen des Fachgebiets Rechnersysteme wird Java-Bytecode eingesetzt.
+
+\begin{figure}
+	\centering
+	\includegraphics[width = 1\textwidth]{Graphics/system.png}
+	\caption{Konfiguration des verwendeten AMIDAR-Systems, automatisch generiert durch den AMIDAR-Systembuilder}
+
+\end{figure}
+
