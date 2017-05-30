@@ -6,44 +6,16 @@ A level-1 auxiliary file: Evaluation.aux
 A level-1 auxiliary file: Zusammenfassung.aux
 The style file: alphadin.bst
 Database file #1: Literaturverzeichnis.bib
-I was expecting a `,' or a `}'---line 2 of file Literaturverzeichnis.bib
- : @misc{IP 
- :          RFC,
+I was expecting a `,' or a `}'---line 23 of file Literaturverzeichnis.bib
+ : 
+ : note = {stand 30.05.2017}
+(Error may have been on previous line)
 I'm skipping whatever remains of this entry
-I was expecting a `,' or a `}'---line 8 of file Literaturverzeichnis.bib
- : @misc{TCP 
- :           RFC,
-I'm skipping whatever remains of this entry
-Repeated entry---line 14 of file Literaturverzeichnis.bib
- : @misc{TCP
- :           Congestion Control RFC,
-I'm skipping whatever remains of this entry
-I was expecting a `,' or a `}'---line 20 of file Literaturverzeichnis.bib
- : @misc{DHCP 
- :            options,
-I'm skipping whatever remains of this entry
-Repeated entry---line 26 of file Literaturverzeichnis.bib
- : @misc{TCP
- :           FSM,
-I'm skipping whatever remains of this entry
-Warning--to sort, need author or key in IP
-Warning--to sort, need author or key in TCP
-Warning--to sort, need author or key in DHCP
-Warning--to sort, need author or key in ISC-DHCPD
+Warning--to sort, need author or key in IPrfc
+Warning--to sort, need author or key in TCPr
+Warning--to sort, need author or key in cc
+Warning--to sort, need author or key in DHCPr
+Warning--to sort, need author or key in TCPm
+Warning--to sort, need author or key in ISC
 Warning--to sort, need author or key in ejlP
-Warning--DHCP
-ptr=1, stack=
-
----the literal stack isn't empty for entry DHCP
-while executing---line 2205 of file alphadin.bst
-Warning--IP
-ptr=1, stack=
-
----the literal stack isn't empty for entry IP
-while executing---line 2205 of file alphadin.bst
-Warning--TCP
-ptr=1, stack=
-
----the literal stack isn't empty for entry TCP
-while executing---line 2205 of file alphadin.bst
-(There were 8 error messages)
+(There was 1 error message)
