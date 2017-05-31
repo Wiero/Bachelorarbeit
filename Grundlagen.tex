@@ -7,7 +7,7 @@ Die unterste Schicht stellt dabei das \textit{Physical Layer} dar und beschreibt
 Darüber sorgt die Sicherungsschicht für eine funktionierende Verbindung zwischen den Endgeräten und dem Übertragungsmedium. Auf dieser Schicht wird zum Beispiel das Ethernet Protokoll eingesetzt, das Netzwerkteilnehmer über die MAC-Adresse im lokalen Netz adressiert, die übertragenen Daten auf Fehler überprüft und im Zweifel verwirft. 
 Darüber kommt die Vermittlungsschicht, in der die Endgeräte über mehrere Subnetze hinweg adressiert werden und Routing und Datenflusskontrolle gesteuert werden. Ein wichtiges Protokoll dieser Schicht ist das IP Protokoll. \\
 Bei einer Datenübertragung von einer Anwendung zu einer auf einem anderen Endgerät laufenden, werden die Daten durch die Schichten nach unten gereicht, wobei in jeder Schicht ein neuer Header erzeugt wird, der für die jeweilige Schicht wichtige Informationen enthält. Zum Beispiel werden die Daten von der Anwendung mit betriebssystemabhängigen Systemaufrufen an den TCP-Stack übergeben. Dieser erzeugt ein TCP-Paket, das außer den Daten einen Header enthält, welcher Informationen bereitstellt, die sowohl für das richtige Zusammensetzen der einzelnen Datenpakete beim Empfänger, als auch für die Zuordnung der übertragenen Daten zu der jeweiligen Anwendung benötigt werden.\\\\
-Bei der anschließenden Erzeugung des IP-Pakets bildet das TCP-Paket, bestehend aus Nutzdaten und TCP-Header, die zu übertragenden Daten. Der IP Header enthält unter anderem die IP-Adressen des Ziel- und Quell-Geräts. Das IP Paket bleibt im Normalfall unverändert, bis das Zielgerät erreicht ist. An der nächst unteren Ebene steht das Ethernet Datagramm. Es enthält neben dem IP Paket die physischen Adressen des Quell-Endgeräts und der nächsten Zwischenstation auf dem Weg zum Ziel. Bei Zwischenstationen wird anhand der Informationen des IP-Headers der nächste Wegpunkt ermittelt und ein neues Datagramm erzeugt. \\
+Bei der anschließenden Erzeugung des IP-Pakets bildet das TCP-Paket, bestehend aus Nutzdaten und TCP-Header, die zu übertragenden Daten. Der IP-Header enthält unter anderem die IP-Adressen des Ziel- und Quell-Geräts. Das IP-Paket bleibt im Normalfall unverändert, bis das Zielgerät erreicht ist. An der nächst unteren Ebene steht das Ethernet Datagramm. Es enthält neben dem IP-Paket die physischen Adressen des Quell-Endgeräts und der nächsten Zwischenstation auf dem Weg zum Ziel. Bei Zwischenstationen wird anhand der Informationen des IP-Headers der nächste Wegpunkt ermittelt und ein neues Datagramm erzeugt. \\
 Wenn ein Datagramm das Ziel erreicht, wird das IP-Paket extrahiert und daraus das TCP-Paket. Anhand der Port Nummer kann das TCP-Paket der Anwendung zugeordnet werden.\cite{Layer}
 
 
@@ -92,7 +92,7 @@ Paketfragmentierung wird nötig, wenn ein Paket aus einem Netzwerk kommt, das ei
 	\centering
 	\includegraphics[width=0.75\textwidth]{Graphics/IPfragmentation.png}
 	\caption{IP-Paket Fragmentierung}
-\end{figure}
+\end{figure}\\
 Damit fragmentierte Paket richtig zusammengesetzt werden können, haben alle Fragmente eines Pakets die gleiche Identifikationsnummer. Für das Zusammensetzen des Datenblock wird der Fragmentoffset benötigt, der angibt, an welcher Stelle des ursprünglichen Datenblocks die Daten des Fragments stehen. Das fragmented-flag sagt dabei aus, ob noch weitere Fragmente folgen, oder ob dies das letzte Teil ist. Sobald alle Fragmente eines Pakets beim Ziel eingetroffen sind, kann das ursprüngliche Paket wiederhergestellt werden.\cite{IPrfc} 
 
 \FloatBarrier

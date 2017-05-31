@@ -110,7 +110,7 @@ Alle anderen Usercalls werden mit Fehlermeldungen beendet.
 \item[LISTEN:]
 Im Zustand LISTEN wird auf einen Verbindungsaufbau von einem externen Host gewartet. Ein \textit{activeOpen}-Usercall kann auch in diesem Zustand noch ausgeführt werden, mit demselben Ablauf wie im Zustand CLOSED. Bei einem \textit{receive} Aufruf können noch keine Daten zurückgegeben werden, da keine aktive Verbindung aufgebaut ist. Der \textit{Receive}-Usercall wird jedoch zwischengespeichert. 
 Die Calls \textit{close} und \textit{abort} löschen den TCB und geben den Zustand CLOSED zurück.
-Bei eintreffenden Paketen wird geprüft, ob es sich um ein SYN-Paket handelt. In diesem Fall wird die Initiale Sequenznummer berechnet und ein SYN-ACK Paket in die Paket-out-Queue abgelegt. Daraufhin geht die Verbindung in den Zustand SYN-RECEIVED über. Alle anderen eintreffenden Pakete deuten auf eine Fehlfunktion der Verbindung der Gegenstelle hin und werden mit einen RST Paket beantwortet. 
+Bei eintreffenden Paketen wird geprüft, ob es sich um ein SYN-Paket handelt. In diesem Fall wird die Initiale Sequenznummer berechnet und ein SYN-ACK Paket in die Paket-out-Queue abgelegt. Daraufhin geht die Verbindung in den Zustand SYN-RECEIVED über. Alle anderen eintreffenden Pakete deuten auf eine Fehlfunktion der Verbindung der Gegenstelle hin und werden mit einen RST-Paket beantwortet. 
 
 
 \item[SYN-RECEIVED:]
