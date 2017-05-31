@@ -8,12 +8,12 @@
 \contentsline {figure}{\numberline {2.5}{\ignorespaces vereinfachter Zustandsautomat TCP}}{13}{figure.2.5}
 \contentsline {figure}{\numberline {2.6}{\ignorespaces TCP Handshake mit Zustandstransitionen}}{14}{figure.2.6}
 \contentsline {figure}{\numberline {2.7}{\ignorespaces BOOTP Message Format}}{17}{figure.2.7}
-\contentsline {figure}{\numberline {2.8}{\ignorespaces Konfiguration des verwendeten AMIDAR-Systems, automatisch generiert durch den AMIDAR-Systembuilder}}{21}{figure.2.8}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Auszug Klassendiagramm TCP/IP}}{23}{figure.3.1}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Auszug Klassendiagramm TCP/IP}}{22}{figure.3.1}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Konfiguration des verwendeten AMIDAR-Systems, automatisch generiert durch den AMIDAR-Systembuilder}}{32}{figure.4.1}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\addvspace {10\p@ }
-\contentsline {figure}{\numberline {A.1}{\ignorespaces DHCP, Drei-Wege-Handschlag, Daten\IeC {\"u}bertragung}}{36}{figure.A.1}
-\contentsline {figure}{\numberline {A.2}{\ignorespaces Gleichzeitiger Verbindungsaufbau mehrerer Verbindungen}}{36}{figure.A.2}
-\contentsline {figure}{\numberline {A.3}{\ignorespaces keep-alive und Retransmissions, wegen schwankender Latenz, bei gro\IeC {\ss }en Datenpaketen}}{37}{figure.A.3}
+\contentsline {figure}{\numberline {A.1}{\ignorespaces DHCP, Drei-Wege-Handschlag, Daten\IeC {\"u}bertragung}}{37}{figure.A.1}
+\contentsline {figure}{\numberline {A.2}{\ignorespaces Gleichzeitiger Verbindungsaufbau mehrerer Verbindungen}}{37}{figure.A.2}
+\contentsline {figure}{\numberline {A.3}{\ignorespaces keep-alive und Retransmissions, wegen schwankender Latenz, bei gro\IeC {\ss }en Datenpaketen}}{38}{figure.A.3}
