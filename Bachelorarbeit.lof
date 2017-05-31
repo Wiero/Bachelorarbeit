@@ -9,9 +9,11 @@
 \contentsline {figure}{\numberline {2.6}{\ignorespaces TCP Handshake mit Zustandstransitionen}}{14}{figure.2.6}
 \contentsline {figure}{\numberline {2.7}{\ignorespaces BOOTP Message Format}}{17}{figure.2.7}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Auszug Klassendiagramm TCP/IP}}{22}{figure.3.1}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces AMIDAR Aufbau}}{21}{figure.3.1}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Konfiguration des verwendeten AMIDAR-Systems, automatisch generiert durch den AMIDAR-Systembuilder}}{32}{figure.4.1}
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Auszug Klassendiagramm TCP/IP}}{23}{figure.4.1}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Konfiguration des verwendeten AMIDAR-Systems, automatisch generiert durch den AMIDAR-Systembuilder}}{33}{figure.5.1}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {A.1}{\ignorespaces DHCP, Drei-Wege-Handschlag, Daten\IeC {\"u}bertragung}}{37}{figure.A.1}

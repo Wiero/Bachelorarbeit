@@ -1,4 +1,4 @@
-\chapter{Grundlagen Netzwerk und AMIDAR}
+\chapter{Grundlagen Netzwerk}
 In diesem Kapitel werden die Grundlagen von AMIDAR und der für diese Arbeit genutzten Netzwerkprotokolle erläutert. 
 
 \section{Netzwerk Schichtenmodell}
@@ -367,7 +367,11 @@ Während dieses Vorgangs können neben der IP auch noch andere Informationen abg
 
 
 
-\section{AMIDAR Prozessor}
+\chapter{AMIDAR Prozessor}
 Bei der Klasse der AMIDAR-Prozessoren handelt es sich um rekonfigurierbare Systeme, die zur Laufzeit an die Anwendung angepasst werden können. Sie bestehen jeweils aus mehreren {}"Function Units"{}, die über ein Token- und ein Datennetzwerk verbunden sind. Ein Token stellt dabei eine Mikroinstruktion dar. Diese werden durch die Tokenmaschine aus den Prozessor-Instruktionen generiert. Dazu kommen FUs für Framestack, Heap, ALUs und Hardwarebeschleuniger. Bei den in Hardware implementierten Prototypen des Fachgebiets Rechnersysteme wird Java-Bytecode eingesetzt.
 
-
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{Graphics/AMIDAR.png}
+\caption{AMIDAR Aufbau}
+\end{figure}
