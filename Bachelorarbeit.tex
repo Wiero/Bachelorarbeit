@@ -49,13 +49,17 @@ Prüfer: Prof. Dr.-Ing. Christian Hochberger\\
 Betreuer: Dipl.-Inform. Changgong Li
 
 \tableofcontents
-
 \include{Einleitung}
 \include{Grundlagen}
 \include{Implementierung}
 \include{Evaluation}
-
 \include{Zusammenfassung}
+
+\begin{appendix}
+  \input{Anhang}
+\end{appendix}
+
+\cleardoublepage
 
 \section*{Abkürzungsverzeichnis}
 \begin{acronym}
@@ -68,12 +72,20 @@ Betreuer: Dipl.-Inform. Changgong Li
 \acro{TCP}{Transmission Control Protocol}
 \acro{UDP}{User Datagram Protocol}
 \acro{API}{Application Programming Interface}
+\acro{MAC}{Media-Access-Control}
+\acro{IEEE}{Institute of Electrical and Electronics Engineers}
+\acro{TTL}{Time to Live}
+\acro{FU}{Function Unit}
+\acro{ALU}{arithmetic logic unit}
 
 \end{acronym}
 
+
 \listoffigures
+\cleardoublepage
 
 \makeatletter
+
 \renewcommand\chapter{\thispagestyle{\chapterpagestyle}%
                     \global\@topnum\z@
                     \@afterindentfalse
@@ -83,9 +95,6 @@ Betreuer: Dipl.-Inform. Changgong Li
 \nocite{*}
 \bibliographystyle{alphadin}
 \bibliography{Literaturverzeichnis}
-  \begin{appendix}
-  \input{Anhang}
-  \end{appendix}
 
 
 

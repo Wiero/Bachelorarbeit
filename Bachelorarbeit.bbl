@@ -21,6 +21,11 @@
 \newblock \url{http://orbit.dtu.dk/files/6633077/41129d01.pdf}. --
 \newblock stand 30.05.2017
 
+\bibitem[Eth]{Eth}
+\emph{IEEE 802.3 / Ethernet-Grundlagen}.
+\newblock \url{https://www.elektronik-kompendium.de/sites/net/0603201.htm}. --
+\newblock stand 30.05.2017
+
 \bibitem[IPr]{IPrfc}
 \emph{INTERNET PROTOCOL - PROTOCOL SPECIFICATION}.
 \newblock \url{https://tools.ietf.org/html/rfc791}. --
@@ -29,6 +34,11 @@
 \bibitem[ISC]{ISC}
 \emph{ISC-DHCPD}.
 \newblock \url{https://wiki.ubuntuusers.de/ISC-DHCPD/}. --
+\newblock stand 30.05.2017
+
+\bibitem[Lay]{Layer}
+\emph{TCP/IP Five Layer Software Model Overview}.
+\newblock \url{http://microchipdeveloper.com/tcpip:tcp-ip-five-layer-model}. --
 \newblock stand 30.05.2017
 
 \bibitem[TCPa]{TCPm}

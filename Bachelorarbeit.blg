@@ -11,6 +11,8 @@ I was expecting a `,' or a `}'---line 23 of file Literaturverzeichnis.bib
  : note = {stand 30.05.2017}
 (Error may have been on previous line)
 I'm skipping whatever remains of this entry
+Warning--to sort, need author or key in Layer
+Warning--to sort, need author or key in Eth
 Warning--to sort, need author or key in IPrfc
 Warning--to sort, need author or key in TCPr
 Warning--to sort, need author or key in cc

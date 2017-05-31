@@ -13,3 +13,7 @@
 \contentsline {figure}{\numberline {3.1}{\ignorespaces Auszug Klassendiagramm TCP/IP}}{23}{figure.3.1}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {A.1}{\ignorespaces DHCP, Drei-Wege-Handschlag, Daten\IeC {\"u}bertragung}}{36}{figure.A.1}
+\contentsline {figure}{\numberline {A.2}{\ignorespaces Gleichzeitiger Verbindungsaufbau mehrerer Verbindungen}}{36}{figure.A.2}
+\contentsline {figure}{\numberline {A.3}{\ignorespaces keep-alive und Retransmissions, wegen schwankender Latenz, bei gro\IeC {\ss }en Datenpaketen}}{37}{figure.A.3}
