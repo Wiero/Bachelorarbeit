@@ -182,12 +182,14 @@ Der DHCP-Controller enthält den Thread, welcher den DHCP-Client steuert. Für d
 Ein Problem bei der Erzeugung der Paketobjekte war, dass jedes Mal eine Reihe von Parametern gesetzt werden muss, die bis auf wenige Fälle den selben Standardwert haben. Die müssen dennoch bei jeder Paket-Erzeugung gesetzt werden, was aufwändig und fehleranfällig ist. Um das zu vermeiden, können die Klassen für TCP- und DHCP-Pakete mit einen "{}Builder Pattern"{} erzeugt werden.  Dabei wird eine spezielle Builder-Klasse genutzt, die als Attribute die Parameter der Paket-Klasse enthält. Diese werden vorinitialisiert. Über spezielle Setter-Methoden können die Werte gesetzt werden. Diese geben als Rückgabewert das Builderobjekt zurück. Der letzte Aufruf auf das Objekt ist jeweils die \textit{build} Funktion, welche den Konstruktor der Paketklasse aufruft und dieses zurück gibt. Ein derartiger Aufruf sieht Beispielsweise wie folgt aus: 
 \lstset{language=Java}
 \begin{lstlisting}
-new TcpPaketBuilder(tcb).setSeqNum(NextSendSeqNum).setAckNum(NextRecseqNum).setAck().build()
+new TcpPaketBuilder(tcb).setSeqNum(NextSendSeqNum)
+.setAckNum(NextRecseqNum).setAck().build()
 \end{lstlisting}
 Das erzeugen eines TCP-Pakets ohne die Verwendung des "{}Builder Patterns"{} sieht folgender maßen aus: 
 
 \begin{lstlisting}
-new TcpPaket(payLoad,length,tcpOptions, connection, seqNum, ackNum, (short)winSize, flags ,urgP);
+new TcpPaket(payLoad,length,tcpOptions, 
+connection, seqNum, ackNum, (short)winSize, flags ,urgP);
 \end{lstlisting}
 
 
